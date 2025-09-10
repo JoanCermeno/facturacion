@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('phone');
             $table->string('email');
+            $table->string('address');
             $table->integer('invoice_sequence')->default(1)->comment('correlativo inicial de facturas definido por el admin');
         });
     }

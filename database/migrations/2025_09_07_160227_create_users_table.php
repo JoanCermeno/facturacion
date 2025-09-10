@@ -10,9 +10,14 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->foreignId('fk_company')->constrained('companys')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreignId('fk_company')
+            ->nullable()
+            ->constrained('companys')
+            ->cascadeOnUpdate()
+            ->nullOnDelete();
             $table->timestamps();
         });
     }
