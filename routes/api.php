@@ -8,7 +8,7 @@ use App\Http\Controllers\CompanyController;
 
 // Rutas de Autenticación
 Route::prefix('auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/register',[AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     // 'logout' debe ser un POST y requiere autenticación
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
