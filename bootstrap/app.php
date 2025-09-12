@@ -3,6 +3,14 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Illuminate\Auth\AuthenticationException;
+use Throwable;
+
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -16,69 +24,62 @@ return Application::configure(basePath: dirname(__DIR__))
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
+
+        $middleware->alias([
+            'auth' => \App\Http\Middleware\Authenticate::class,
+        ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
-         use Illuminate\Validation\ValidationException;
-    use Illuminate\Database\Eloquent\ModelNotFoundException;
-    use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-    use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
-    use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-    use Illuminate\Auth\AuthenticationException;
-    use Throwable;
+    ->withExceptions(function (Exceptions $exceptions): void {  
+        // ⚠️ Errores de validación (422)
+        $exceptions->render(function (ValidationException $e, $request) {
+            return response()->json([
+                'message' => 'Errores de validación',
+                'errors'  => $e->errors(),
+            ], 422);
+        });
 
-    // ⚠️ Errores de validación (422)
-    $exceptions->render(function (ValidationException $e, $request) {
-        return response()->json([
-            'message' => 'Errores de validación',
-            'errors'  => $e->errors(),
-        ], 422);
-    });
+        // 🔒 No autenticado (401)
+        $exceptions->render(function (AuthenticationException $e, $request) {
+            return response()->json([
+                'message' => 'No autenticado',
+            ], 401);
+        });
 
-    // 🔒 No autenticado (401)
-    $exceptions->render(function (AuthenticationException $e, $request) {
-        return response()->json([
-            'message' => 'No autenticado',
-        ], 401);
-    });
+        // 🚫 Prohibido (403)
+        $exceptions->render(function (AccessDeniedHttpException $e, $request) {
+            return response()->json([
+                'message' => 'No tienes permisos para acceder a este recurso',
+            ], 403);
+        });
 
-    // 🚫 Prohibido (403)
-    $exceptions->render(function (AccessDeniedHttpException $e, $request) {
-        return response()->json([
-            'message' => 'No tienes permisos para acceder a este recurso',
-        ], 403);
-    });
+        // 🔎 Modelo no encontrado (404)
+        $exceptions->render(function (ModelNotFoundException $e, $request) {
+            return response()->json([
+                'message' => 'Recurso no encontrado',
+            ], 404);
+        });
 
-    // 🔎 Modelo no encontrado (404)
-    $exceptions->render(function (ModelNotFoundException $e, $request) {
-        return response()->json([
-            'message' => 'Recurso no encontrado',
-        ], 404);
-    });
+        // 📭 Ruta no encontrada (404)
+        $exceptions->render(function (NotFoundHttpException $e, $request) {
+            return response()->json([
+                'message' => 'Ruta no encontrada',
+            ], 404);
+        });
 
-    // 📭 Ruta no encontrada (404)
-    $exceptions->render(function (NotFoundHttpException $e, $request) {
-        return response()->json([
-            'message' => 'Ruta no encontrada',
-        ], 404);
-    });
+        // ❌ Método no permitido (405)
+        $exceptions->render(function (MethodNotAllowedHttpException $e, $request) {
+            return response()->json([
+                'message' => 'Método HTTP no permitido',
+            ], 405);
+        });
 
-    // ❌ Método no permitido (405)
-    $exceptions->render(function (MethodNotAllowedHttpException $e, $request) {
-        return response()->json([
-            'message' => 'Método HTTP no permitido',
-        ], 405);
-    });
-
-    // ⚡ Fallback para cualquier otro error (500)
-    $exceptions->render(function (Throwable $e, $request) {
-        return response()->json([
-            'message' => 'Error interno del servidor',
-            // ⚠️ Solo para desarrollo, comenta esta línea en producción
-            'error'   => $e->getMessage(),
-        ], 500);
-    });
-
-
-
+        // ⚡ Fallback para cualquier otro error (500)
+        $exceptions->render(function (Throwable $e, $request) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                // ⚠️ Solo para desarrollo, comenta esta línea en producción
+                'error'   => $e->getMessage(),
+            ], 500);
+        });
     })
     ->create();

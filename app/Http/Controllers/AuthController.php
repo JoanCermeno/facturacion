@@ -52,7 +52,8 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
-        $token = $user->createToken('api-token')->plainTextToken;
+        $userEmail = $user->email;
+        $token = $user->createToken($userEmail)->plainTextToken;
 
         return response()->json([
             'message' => 'Inicio de sesión exitoso.',
