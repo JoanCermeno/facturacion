@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
         'fk_company',
     ];
 
@@ -33,8 +34,15 @@ class User extends Authenticatable
         return $this->belongsTo(Company::class, 'fk_company');
     }
 
-    public function roles()
+
+    // Helpers para checkear rol
+    public function isAdmin(): bool
     {
-        return $this->hasMany(Role::class, 'fk_user');
+        return $this->role === 'admin';
+    }
+
+    public function isCashier(): bool
+    {
+        return $this->role === 'cashier';
     }
 }

@@ -22,7 +22,7 @@ class CompanyController extends Controller
         if (!$user->fk_company) {
             return response()->json(['message' => 'El usuario no tiene una compañía asociada.'], 404);
         }
-
+        //devolver con la lista de vendedores y cajeros
         $company = Company::find($user->fk_company);
 
         if (!$company) {

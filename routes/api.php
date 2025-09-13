@@ -3,8 +3,10 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProfileController; // Asegúrate de importar tu ProfileController
+use App\Http\Controllers\ProfileController; 
 use App\Http\Controllers\CompanyController; 
+use App\Http\Controllers\SellerController;
+use App\Http\Controllers\CashierController;
 
 // Rutas de Autenticación
 Route::prefix('auth')->group(function () {
@@ -39,6 +41,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rutas para la gestión de la compañía del usuario (admin)
     Route::get('/company', [CompanyController::class, 'show']); // Mostrar datos de la compañía del admin
     Route::put('/company', [CompanyController::class, 'update']); // Crear/Actualizar datos de la compañía del admin
+
+
+    Route::get('/sellers', [SellerController::class, 'index']);   // Listar vendedores
+    Route::post('/sellers', [SellerController::class, 'store']); // Crear vendedor
+
+    // Rutas para la gestión de los cajeros
+    Route::get('/cashiers', [CashierController::class, 'index']);
+    Route::post('/cashiers', [CashierController::class, 'store']);
 
 
 });

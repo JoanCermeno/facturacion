@@ -11,9 +11,10 @@ return new class extends Migration
         Schema::create('sellers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('ci', 12)->comment('número de cédula del vendedor');
-            $table->decimal('commission_percentage', 5, 2)->default(0)->comment('porcentaje de comisión');
-            $table->foreignId('fk_company')->constrained('companys')->cascadeOnUpdate()->restrictOnDelete();
+            $table->string('ci', 12)->unique()->comment('Cedula unica del vendedor');       // Cédula única
+            $table->string('phone')->nullable()->comment('Teléfono del vendedor');          // Teléfono
+            $table->decimal('commission', 5, 2)->default(0)->comment('porcentaje de comisión');
+            $table->foreignId('company_id')->constrained('companys')->cascadeOnUpdate()->restrictOnDelete();
         });
     }
 

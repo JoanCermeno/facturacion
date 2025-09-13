@@ -14,8 +14,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property string $name
  * @property string $ci
- * @property float $commission_percentage
- * @property int $fk_company
+ * @property float $commission
+ * @property int $company_id
  * 
  * @property Company $company
  *
@@ -27,19 +27,20 @@ class Seller extends Model
 	public $timestamps = false;
 
 	protected $casts = [
-		'commission_percentage' => 'float',
-		'fk_company' => 'int'
+		'commission' => 'float',
+		'company_id' => 'int'
 	];
 
 	protected $fillable = [
 		'name',
 		'ci',
-		'commission_percentage',
-		'fk_company'
+		'phone',
+		'commission',
+		'company_id'
 	];
 
 	public function company()
 	{
-		return $this->belongsTo(Company::class, 'fk_company');
+		return $this->belongsTo(Company::class, 'company_id');
 	}
 }
