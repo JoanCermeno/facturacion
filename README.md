@@ -1,61 +1,248 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+---
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# 📌 API Endpoints – Facturación (Laravel 11)
 
-## About Laravel
+Todos los endpoints están bajo el prefijo `/api`.
+Las rutas que requieren autenticación usan **Laravel Sanctum** y deben incluir el header:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+```http
+Authorization: Bearer {TOKEN}
+```
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🔑 Autenticación
 
-## Learning Laravel
+### `POST /api/auth/register`
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Registrar un nuevo usuario (sin empresa al inicio).
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+**Body:**
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```json
+{
+  "name": "Joan",
+  "email": "joan@example.com",
+  "password": "secret123",
+  "password_confirmation": "secret123"
+}
+```
 
-## Laravel Sponsors
+**Respuestas:**
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+* ✅ `201 Created`: Usuario registrado
+* ❌ `422 Unprocessable Entity`: Error de validación
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### `POST /api/auth/login`
 
-## Contributing
+Iniciar sesión y obtener token Sanctum.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+**Body:**
 
-## Code of Conduct
+```json
+{
+  "email": "joan@example.com",
+  "password": "secret123"
+}
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**Respuestas:**
 
-## Security Vulnerabilities
+* ✅ `200 OK`: Devuelve `token` y datos del usuario
+* ❌ `401 Unauthorized`: Credenciales incorrectas
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+### `POST /api/auth/logout`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Cerrar sesión y revocar el token.
+
+🔒 **Requiere autenticación**.
+
+---
+
+## 👤 Perfil del Usuario
+
+### `GET /api/user`
+
+Obtener datos del usuario autenticado.
+
+**Respuestas:**
+
+```json
+{
+  "message": "Información del usuario autenticado",
+  "user": {
+    "id": 1,
+    "name": "Joan",
+    "email": "joan@example.com",
+    "role": "admin",
+    "fk_company": 1
+  }
+}
+```
+
+---
+
+### `GET /api/profile`
+
+Mostrar datos del perfil del usuario autenticado.
+
+---
+
+### `PUT /api/profile`
+
+Actualizar datos generales del perfil.
+
+**Body (ejemplo):**
+
+```json
+{
+  "name": "Joan Cermeño",
+  "email": "joan.c@example.com"
+}
+```
+
+---
+
+### `PUT /api/profile/password`
+
+Cambiar la contraseña del usuario.
+
+**Body:**
+
+```json
+{
+  "current_password": "secret123",
+  "new_password": "NuevoPass123",
+  "new_password_confirmation": "NuevoPass123"
+}
+```
+
+---
+
+## 🏢 Empresa
+
+### `GET /api/company`
+
+Mostrar los datos de la empresa asociada al usuario autenticado.
+
+---
+
+### `PUT /api/company`
+
+Crear o actualizar los datos de la empresa del admin autenticado.
+
+**Body (ejemplo):**
+
+```json
+{
+  "name": "Mi Empresa C.A",
+  "rif": "J-12345678-9",
+  "phone": "04121234567",
+  "address": "Caracas, Venezuela"
+}
+```
+
+---
+
+## 👨‍💼 Vendedores
+
+### `GET /api/sellers`
+
+Listar vendedores de la empresa del admin autenticado.
+
+**Respuestas (ejemplo):**
+
+```json
+[
+  {
+    "id": 1,
+    "ci": "12345678",
+    "name": "Pedro Pérez",
+    "phone": "04121234567",
+    "commission": 10,
+    "company_id": 1
+  }
+]
+```
+
+---
+
+### `POST /api/sellers`
+
+Crear un nuevo vendedor bajo la empresa del admin autenticado.
+
+**Body:**
+
+```json
+{
+  "ci": "87654321",
+  "name": "María López",
+  "phone": "04124567890",
+  "commission": 15
+}
+```
+
+---
+
+## 💳 Cajeros
+
+Un **cajero** es un usuario (`users.role = cashier`) que pertenece a la empresa de un admin.
+
+### `GET /api/cashiers`
+
+Listar todos los cajeros de la empresa del admin autenticado.
+
+**Respuestas (ejemplo):**
+
+```json
+[
+  {
+    "id": 5,
+    "name": "Juan Torres",
+    "email": "juan@example.com",
+    "role": "cashier",
+    "fk_company": 1,
+    "created_at": "2025-09-14T10:23:00"
+  }
+]
+```
+
+---
+
+### `POST /api/cashiers`
+
+Crear un nuevo cajero.
+
+**Body:**
+
+```json
+{
+  "name": "Juan Torres",
+  "email": "juan@example.com",
+  "password": "secret123",
+  "password_confirmation": "secret123",
+  "phone": "04121234567"
+}
+```
+
+**Respuestas:**
+
+* ✅ `201 Created`: Cajero creado correctamente
+* ❌ `403 Forbidden`: El usuario autenticado no es admin
+* ❌ `422 Unprocessable Entity`: Validación fallida
+
+---
+
+## ⚡ Resumen rápido
+
+* **Auth:** `register`, `login`, `logout`
+* **Perfil:** `GET/PUT profile`, `PUT profile/password`
+* **Empresa:** `GET/PUT company`
+* **Vendedores:** `GET/POST sellers`
+* **Cajeros:** `GET/POST cashiers`
+
+---
