@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CompanyController; 
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\CashierController;
+use App\Http\Controllers\DepartmentController;
 
 // Rutas de Autenticación
 Route::prefix('auth')->group(function () {
@@ -50,5 +51,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cashiers', [CashierController::class, 'index']);
     Route::post('/cashiers', [CashierController::class, 'store']);
 
+
+    // Rutas para la gestión de departamentos
+    Route::get('/departments', [DepartmentController::class, 'index']);   // Listar departamentos de la empresa
+    Route::post('/departments', [DepartmentController::class, 'store']);  // Crear departamento
+    Route::put('/departments/{id}', [DepartmentController::class, 'update']); // Editar departamento
+    Route::delete('/departments/{id}', [DepartmentController::class, 'destroy']); // Borrar departamento
 
 });

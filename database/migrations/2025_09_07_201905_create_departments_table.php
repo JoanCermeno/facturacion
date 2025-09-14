@@ -10,9 +10,14 @@ return new class extends Migration
     {
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('company_id')
+                  ->constrained('companys')
+                  ->cascadeOnUpdate()
+                  ->cascadeOnDelete();
             $table->string('code')->unique();
             $table->string('description');
-            $table->enum('type', ['service', 'unit'])->default('unit'); // 'service' no descuenta inventario
+            $table->enum('type', ['service', 'unit'])->default('unit'); 
+            // 'service' = no descuenta inventario
             $table->timestamps();
         });
     }

@@ -1,41 +1,29 @@
 <?php
 
-/**
- * Created by Reliese Model.
- */
-
 namespace App\Models;
 
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Class Department
- * 
- * @property int $id
- * @property string $code
- * @property string $description
- * @property string $type
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * 
- * @property Collection|Product[] $products
- *
- * @package App\Models
- */
 class Department extends Model
 {
-	protected $table = 'departments';
+    protected $table = 'departments';
 
-	protected $fillable = [
-		'code',
-		'description',
-		'type'
-	];
+    protected $fillable = [
+        'company_id',
+        'code',
+        'description',
+        'type'
+    ];
 
-	public function products()
-	{
-		return $this->hasMany(Product::class);
-	}
+    // 🔗 Relación: cada departamento pertenece a una empresa
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    // 🔗 Relación: un departamento puede tener muchos productos
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }
