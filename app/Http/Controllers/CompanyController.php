@@ -23,7 +23,7 @@ class CompanyController extends Controller
             return response()->json(['message' => 'El usuario no tiene una compañía asociada.'], 404);
         }
         //devolver con la lista de vendedores y cajeros
-        $company = Company::find($user->fk_company);
+        $company = Company::find($user->fk_company)->load('users')->load('sellers');
 
         if (!$company) {
             // Esto podría ocurrir si fk_company apunta a un ID de compañía que ya no existe

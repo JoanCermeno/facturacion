@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Seller;
 
 class Company extends Model
 {
@@ -36,9 +37,11 @@ class Company extends Model
         return $this->hasMany(Product::class, 'company_id');
     }
 
-    // Si tienes una tabla 'sellers' separada y no la unificas con 'users'
-    // public function sellers()
-    // {
-    //     return $this->hasMany(Seller::class, 'fk_company');
-    // }
+    /**
+     * Get the sellers for the company.
+     */
+    public function sellers()
+    {
+        return $this->hasMany(Seller::class, 'company_id');
+    }
 }
