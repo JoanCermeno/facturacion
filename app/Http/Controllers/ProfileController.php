@@ -37,20 +37,21 @@ class ProfileController extends Controller
     public function updatePassword(Request $request)
     {
         $request->validate([
-            'current_password'      => 'required',
-            'new_password'          => 'required|min:8|confirmed',
+            'current_password'          => 'required',
+            'new_password'              => 'required|min:8|confirmed',
         ]);
 
         $user = $request->user();
 
+        // Verificar contraseña actual
         if (!Hash::check($request->current_password, $user->password)) {
             return response()->json(['error' => 'La contraseña actual no es correcta'], 422);
         }
 
+        // Guardar nueva contraseña
         $user->password = Hash::make($request->new_password);
         $user->save();
 
         return response()->json(['message' => 'Contraseña actualizada correctamente ✅']);
     }
-
 }
