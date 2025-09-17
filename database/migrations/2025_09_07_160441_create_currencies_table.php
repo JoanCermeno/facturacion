@@ -10,8 +10,10 @@ return new class extends Migration
     {
         Schema::create('currencies', function (Blueprint $table) {
             $table->id();
-            $table->string('symbol', 5);
-            $table->decimal('exchange_rate', 12, 4); // tasa cambiaria
+            $table->string('symbol', 5)->unique(); // Ej: USD, VES, COP
+            $table->string('name', 50);             // Ej: Dólar, Bolívar, Peso Colombiano
+            $table->decimal('exchange_rate', 15, 6); // Tasa (cuánto vale 1 USD en esa moneda)
+            $table->boolean('is_base')->default(false); // Solo una moneda base (USD)
             $table->timestamps();
         });
     }

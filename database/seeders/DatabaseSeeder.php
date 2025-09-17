@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Seeder;
+use Database\Seeders\CurrencySeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,5 +22,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('12345678'),
             'role' => 'admin',
         ]);
+
+        $this->call(CurrencySeeder::class);
     }
 }

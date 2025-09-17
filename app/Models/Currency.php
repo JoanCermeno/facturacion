@@ -28,8 +28,5 @@ class Currency extends Model
 		'exchange_rate' => 'float'
 	];
 
-	protected $fillable = [
-		'symbol',
-		'exchange_rate'
-	];
+	protected $fillable = ['name', 'symbol', 'exchange_rate'];
 }
