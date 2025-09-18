@@ -15,9 +15,9 @@ return new class extends Migration
             $table->string('password');
             $table->enum('role', ['admin', 'cashier'])
             ->default('cashier');
-            $table->foreignId('fk_company')
+            $table->foreignId('companies_id')
             ->nullable()
-            ->constrained('companys')
+            ->constrained('companies')
             ->cascadeOnUpdate()
             ->nullOnDelete();
             $table->timestamps();

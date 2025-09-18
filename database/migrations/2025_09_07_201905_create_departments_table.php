@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')
-                  ->constrained('companys')
+            $table->foreignId('companies_id')
+                  ->constrained('companies')
                   ->cascadeOnUpdate()
                   ->cascadeOnDelete();
             $table->string('code')->unique();

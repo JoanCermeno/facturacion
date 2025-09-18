@@ -10,7 +10,7 @@ return new class extends Migration {
     {
         Schema::create('price_types', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained()->onDelete('cascade');
+            $table->foreignId('companies_id')->constrained()->onDelete('cascade');
             $table->string('name')->unique();
             $table->string('slug')->unique();
             $table->timestamps();

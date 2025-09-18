@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::table('companys', function (Blueprint $table) {
+        Schema::table('companies', function (Blueprint $table) {
             $table->enum('profit_formula', ['linear', 'financial'])
                   ->default('linear')
                   ->after('invoice_sequence');
@@ -16,7 +16,7 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::table('companys', function (Blueprint $table) {
+        Schema::table('companies', function (Blueprint $table) {
             $table->dropColumn('profit_formula');
         });
     }

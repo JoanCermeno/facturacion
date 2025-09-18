@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('ci', 12)->unique()->comment('Cedula unica del vendedor');       // Cédula única
             $table->string('phone')->nullable()->comment('Teléfono del vendedor');          // Teléfono
             $table->decimal('commission', 5, 2)->default(0)->comment('porcentaje de comisión');
-            $table->foreignId('company_id')->constrained('companys')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreignId('companies_id')->constrained('companies')->cascadeOnUpdate()->restrictOnDelete();
         });
     }
 

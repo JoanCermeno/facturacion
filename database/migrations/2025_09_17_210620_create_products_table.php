@@ -7,20 +7,24 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
+       Schema::create('products', function (Blueprint $table) {
             $table->id();
-
-            // Relaciones
-            $table->foreignId('company_id')->constrained()->onDelete('cascade');
+            $table->foreignId('companies_id')->constrained()->onDelete('cascade');
             $table->foreignId('department_id')->nullable()->constrained()->onDelete('set null');
-
-            // Datos del producto
-            $table->string('code')->unique();
+            $table->string('code');
+            $table->unique(['companies_id', 'code']); // Unicidad por empresa
             $table->string('name');
             $table->text('description')->nullable();
-            $table->decimal('cost_usd', 12, 2);
-
-            
+            $table->decimal('cost_usd', 12, 2)->default(0);
+            $table->enum('base_unit', [
+                'unit', 'box', 'pack', 'pair', 'dozen',
+                'kg', 'gr', 'lb', 'oz',
+                'lt', 'ml', 'gal',
+                'm', 'cm', 'mm', 'inch',
+                'sqm', 'sqft',
+                'hour', 'day',
+                'service'
+            ])->default('unit');
             $table->timestamps();
         });
     }
