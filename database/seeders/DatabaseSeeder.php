@@ -6,6 +6,9 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Seeder;
 use Database\Seeders\CurrencySeeder;
+use Database\Seeders\PriceTypesSeeder;
+//seeder para la empresa
+use Database\Seeders\CompaniesSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,5 +27,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(CurrencySeeder::class);
+        $this->call(CompaniesSeeder::class);
+        $this->call(PriceTypesSeeder::class);
     }
 }
