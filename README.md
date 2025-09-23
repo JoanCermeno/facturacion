@@ -1,248 +1,103 @@
----
+## 🎯 Objetivos de la app
 
-# 📌 API Endpoints – Facturación (Laravel 11)
+Desarrollar una aplicación tipo **POS (punto de venta)** para que un usuario propietario de un negocio o empresa pueda:
 
-Todos los endpoints están bajo el prefijo `/api`.
-Las rutas que requieren autenticación usan **Laravel Sanctum** y deben incluir el header:
-
-```http
-Authorization: Bearer {TOKEN}
-```
-
----
-
-## 🔑 Autenticación
-
-### `POST /api/auth/register`
-
-Registrar un nuevo usuario (sin empresa al inicio).
-
-**Body:**
-
-```json
-{
-  "name": "Joan",
-  "email": "joan@example.com",
-  "password": "secret123",
-  "password_confirmation": "secret123"
-}
-```
-
-**Respuestas:**
-
-* ✅ `201 Created`: Usuario registrado
-* ❌ `422 Unprocessable Entity`: Error de validación
+- Registrar su **empresa**.
+- Administrar **usuarios** con diferentes roles: propietarios, administradores, cajeros y vendedores.
+- Registrar **productos y servicios** de la empresa.
+  - Clasificación de productos por **departamentos**.
+  - Posibilidad de registrar **presentaciones** (ej: caja, bulto, paquete).
+  - Múltiples precios por producto:
+    - Precio a crédito.
+    - Precio al mayor.
+    - Precio al detal.
+- Manejar **facturación y notas de entrega**:
+  - Identificar cuáles facturas son fiscales y cuáles son solo notas de entrega.
+- Llevar **control de stock e inventario** de productos físicos.
+- Generar **reportes de ventas y ganancias**.
+- Manejar diferentes **monedas** según la configuración de la empresa (dólares, bolívares, pesos colombianos).
 
 ---
 
-### `POST /api/auth/login`
+## ✅ Lo construido hasta ahora
 
-Iniciar sesión y obtener token Sanctum.
-
-**Body:**
-
-```json
-{
-  "email": "joan@example.com",
-  "password": "secret123"
-}
-```
-
-**Respuestas:**
-
-* ✅ `200 OK`: Devuelve `token` y datos del usuario
-* ❌ `401 Unauthorized`: Credenciales incorrectas
+### 1. Tablas principales creadas
+- **Users** → Usuarios con roles.  
+- **Roles** → Administración de permisos y jerarquías.  
+- **Companies** → Datos de las empresas registradas.  
+- **Sellers** → Vendedores asociados a una empresa.  
+- **Cashiers** → Cajeros asociados a una empresa.  
+- **Departments** → Departamentos para clasificar productos.  
+- **Currencies** → Monedas de operación.  
+- **Products** → Productos y servicios de la empresa.
 
 ---
 
-### `POST /api/auth/logout`
-
-Cerrar sesión y revocar el token.
-
-🔒 **Requiere autenticación**.
-
----
-
-## 👤 Perfil del Usuario
-
-### `GET /api/user`
-
-Obtener datos del usuario autenticado.
-
-**Respuestas:**
-
-```json
-{
-  "message": "Información del usuario autenticado",
-  "user": {
-    "id": 1,
-    "name": "Joan",
-    "email": "joan@example.com",
-    "role": "admin",
-    "fk_company": 1
-  }
-}
-```
+### 2. Controladores implementados
+- **AuthController** → Registro, login y logout de usuarios.  
+- **ProfileController** → Gestión del perfil y cambio de contraseña.  
+- **CompaniesController** → Mostrar y actualizar datos de la empresa.  
+- **SellerController** → Gestión de vendedores.  
+- **CashierController** → Gestión de cajeros.  
+- **DepartmentController** → CRUD de departamentos.  
+- **CurrencyController** → Gestión de monedas (API Resource).  
+- **ProductController** → Gestión de productos (API Resource).  
 
 ---
 
-### `GET /api/profile`
+### 3. Rutas actuales (`api.php`)
 
-Mostrar datos del perfil del usuario autenticado.
+#### 🔐 Autenticación (`/auth`)
+- `POST /auth/register` → Registro de usuario.  
+- `POST /auth/login` → Login de usuario.  
+- `POST /auth/logout` → Logout (requiere autenticación).
 
----
+#### 👤 Perfil
+- `GET /user` → Ver datos del usuario autenticado.  
+- `GET /profile` → Mostrar perfil.  
+- `PUT /profile` → Actualizar perfil.  
+- `PUT /profile/password` → Cambiar contraseña.  
 
-### `PUT /api/profile`
+#### 🏢 Empresa
+- `GET /company` → Mostrar datos de la empresa.  
+- `PUT /company` → Actualizar datos de la empresa.  
 
-Actualizar datos generales del perfil.
+#### 🧑‍💼 Vendedores
+- `GET /sellers` → Listar vendedores.  
+- `POST /sellers` → Crear vendedor.  
 
-**Body (ejemplo):**
+#### 💳 Cajeros
+- `GET /cashiers` → Listar cajeros.  
+- `POST /cashiers` → Crear cajero.  
 
-```json
-{
-  "name": "Joan Cermeño",
-  "email": "joan.c@example.com"
-}
-```
+#### 🗂 Departamentos
+- `GET /departments` → Listar departamentos.  
+- `POST /departments` → Crear departamento.  
+- `PUT /departments/{id}` → Editar departamento.  
+- `DELETE /departments/{id}` → Eliminar departamento.  
 
----
+#### 💱 Monedas
+- `apiResource('currencies')` → CRUD completo para monedas.  
 
-### `PUT /api/profile/password`
-
-Cambiar la contraseña del usuario.
-
-**Body:**
-
-```json
-{
-  "current_password": "secret123",
-  "new_password": "NuevoPass123",
-  "new_password_confirmation": "NuevoPass123"
-}
-```
-
----
-
-## 🏢 Empresa
-
-### `GET /api/company`
-
-Mostrar los datos de la empresa asociada al usuario autenticado.
+#### 📦 Productos
+- `apiResource('products')` → CRUD completo para productos.  
 
 ---
 
-### `PUT /api/company`
-
-Crear o actualizar los datos de la empresa del admin autenticado.
-
-**Body (ejemplo):**
-
-```json
-{
-  "name": "Mi Empresa C.A",
-  "rif": "J-12345678-9",
-  "phone": "04121234567",
-  "address": "Caracas, Venezuela"
-}
-```
+## 🚧 Pendientes por implementar
+- Facturación (notas de entrega y facturas fiscales).  
+- Reportes de ventas.  
+- Control de inventario.  
+- Presentaciones de productos (caja, bulto, paquete).  
+- Integración de múltiples precios (crédito, mayor, detal).  
 
 ---
 
-## 👨‍💼 Vendedores
-
-### `GET /api/sellers`
-
-Listar vendedores de la empresa del admin autenticado.
-
-**Respuestas (ejemplo):**
-
-```json
-[
-  {
-    "id": 1,
-    "ci": "12345678",
-    "name": "Pedro Pérez",
-    "phone": "04121234567",
-    "commission": 10,
-    "company_id": 1
-  }
-]
-```
-
----
-
-### `POST /api/sellers`
-
-Crear un nuevo vendedor bajo la empresa del admin autenticado.
-
-**Body:**
-
-```json
-{
-  "ci": "87654321",
-  "name": "María López",
-  "phone": "04124567890",
-  "commission": 15
-}
-```
-
----
-
-## 💳 Cajeros
-
-Un **cajero** es un usuario (`users.role = cashier`) que pertenece a la empresa de un admin.
-
-### `GET /api/cashiers`
-
-Listar todos los cajeros de la empresa del admin autenticado.
-
-**Respuestas (ejemplo):**
-
-```json
-[
-  {
-    "id": 5,
-    "name": "Juan Torres",
-    "email": "juan@example.com",
-    "role": "cashier",
-    "fk_company": 1,
-    "created_at": "2025-09-14T10:23:00"
-  }
-]
-```
-
----
-
-### `POST /api/cashiers`
-
-Crear un nuevo cajero.
-
-**Body:**
-
-```json
-{
-  "name": "Juan Torres",
-  "email": "juan@example.com",
-  "password": "secret123",
-  "password_confirmation": "secret123",
-  "phone": "04121234567"
-}
-```
-
-**Respuestas:**
-
-* ✅ `201 Created`: Cajero creado correctamente
-* ❌ `403 Forbidden`: El usuario autenticado no es admin
-* ❌ `422 Unprocessable Entity`: Validación fallida
-
----
-
-## ⚡ Resumen rápido
-
-* **Auth:** `register`, `login`, `logout`
-* **Perfil:** `GET/PUT profile`, `PUT profile/password`
-* **Empresa:** `GET/PUT company`
-* **Vendedores:** `GET/POST sellers`
-* **Cajeros:** `GET/POST cashiers`
-
----
+# ✅ Estado de tests
+- [x] **AuthTest** → registro y login de usuario.  
+- [x] **SellerTest** → creación de vendedores.  
+- [x] **CompaniesTest** → creación de empresas.  
+- [ ] **CurrenciesTest** → pendiente.  
+- [ ] **DepartmentsTest** → pendiente.  
+- [ ] **CashiersTest** → pendiente.  
+- [ ] **ProductsTest** → pendiente.  
