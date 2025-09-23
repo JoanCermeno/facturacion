@@ -14,7 +14,7 @@ class User extends Authenticatable
     protected $table = 'users';
 
     protected $casts = [
-        'fk_company' => 'int'
+        'companies_id' => 'int'
     ];
 
     protected $fillable = [
@@ -22,7 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'fk_company',
+        'companies_id',
     ];
 
     protected $hidden = [
@@ -31,7 +31,7 @@ class User extends Authenticatable
 
     public function company()
     {
-        return $this->belongsTo(Company::class, 'fk_company');
+        return $this->belongsTo(Company::class, 'companies_id');
     }
 
 

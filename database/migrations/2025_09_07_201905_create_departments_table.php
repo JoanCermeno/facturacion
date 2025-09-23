@@ -22,7 +22,7 @@ return new class extends Migration
         });
     }
 
-    public function down(): void
+    public function down(): voidcompanies_id
     {
         Schema::dropIfExists('departments');
     }

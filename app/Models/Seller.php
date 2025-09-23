@@ -28,7 +28,7 @@ class Seller extends Model
 
 	protected $casts = [
 		'commission' => 'float',
-		'company_id' => 'int'
+		'companies_id' => 'int'
 	];
 
 	protected $fillable = [
@@ -36,11 +36,11 @@ class Seller extends Model
 		'ci',
 		'phone',
 		'commission',
-		'company_id'
+		'companies_id'
 	];
 
 	public function company()
 	{
-		return $this->belongsTo(Company::class, 'company_id');
+		return $this->belongsTo(Company::class, 'companies_id');
 	}
 }

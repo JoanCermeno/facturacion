@@ -17,7 +17,7 @@ class CashierController extends Controller
             return response()->json(['message' => 'Solo un admin puede crear cajeros.'], 403);
         }
 
-        if (!$admin->fk_company) {
+        if (!$admin->companies_id) {
             return response()->json(['message' => 'El admin no tiene una empresa asociada.'], 403);
         }
 
@@ -36,7 +36,7 @@ class CashierController extends Controller
             'name'       => $data['name'],
             'email'      => $data['email'],
             'password'   => Hash::make($data['password']),
-            'fk_company' => $admin->fk_company,
+            'companies_id' => $admin->companies_id,
             'role' => 'cashier',
         ]);
 
@@ -51,12 +51,12 @@ class CashierController extends Controller
     {
         $admin = $request->user();
      
-        if (!$admin->fk_company) {
+        if (!$admin->companies_id) {
             return response()->json(['message' => 'No tienes empresa asociada.'], 403);
         }
 
      
-        $cashiers = User::where('fk_company', $admin->fk_company)
+        $cashiers = User::where('companies_id', $admin->companies_id)
             ->where('role', 'cashier')
             ->get();
             return response()->json($cashiers);

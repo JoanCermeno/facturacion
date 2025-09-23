@@ -4,11 +4,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController; 
-use App\Http\Controllers\CompanyController; 
+use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\CurrencyController;
+use App\Http\Controllers\ProductController;
 
 // Rutas de Autenticación
 Route::prefix('auth')->group(function () {
@@ -41,8 +42,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
     
     // Rutas para la gestión de la compañía del usuario (admin)
-    Route::get('/company', [CompanyController::class, 'show']); // Mostrar datos de la compañía del admin
-    Route::put('/company', [CompanyController::class, 'update']); // Crear/Actualizar datos de la compañía del admin
+    Route::get('/company', [CompaniesController::class, 'show']); // Mostrar datos de la compañía del admin
+    Route::put('/company', [CompaniesController::class, 'update']); // Crear/Actualizar datos de la compañía del admin
 
 
     Route::get('/sellers', [SellerController::class, 'index']);   // Listar vendedores
@@ -60,4 +61,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/departments/{id}', [DepartmentController::class, 'destroy']); // Borrar departamento
 
     Route::apiResource('currencies', CurrencyController::class);
+    //productos routes
+    Route::apiResource('products', ProductController::class);
 });

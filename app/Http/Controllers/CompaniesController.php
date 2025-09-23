@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Company;
+use App\Models\Companies;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
-class CompanyController extends Controller
+class CompaniesController extends Controller
 {
     /**
      * Display the authenticated user's company.
@@ -18,15 +18,14 @@ class CompanyController extends Controller
     public function show(Request $request)
     {
         $user = $request->user();
-
-        if (!$user->fk_company) {
+      
+        if (!$user->companies_id) {
             return response()->json(['message' => 'El usuario no tiene una compañía asociada.'], 404);
         }
         //devolver con la lista de vendedores y cajeros
-        $company = Company::find($user->fk_company)->load('users')->load('sellers');
+        $company = Companies::find($user->companies_id)->load('users')->load('sellers');
 
         if (!$company) {
-            // Esto podría ocurrir si fk_company apunta a un ID de compañía que ya no existe
             return response()->json(['message' => 'Compañía asociada no encontrada.'], 404);
         }
 
@@ -48,18 +47,19 @@ class CompanyController extends Controller
             'name'             => 'required|string|max:255',
             'address'          => 'nullable|string|max:255', // Nueva columna 'address'
             'phone'            => 'nullable|string|max:255',
-            'email'            => ['nullable', 'email', Rule::unique('companys')->ignore($user->fk_company)],
+            'rif'              => 'nullable|string|max:255',
+            'email'            => ['nullable', 'email', Rule::unique('companys')->ignore($user->companies_id)],
             'invoice_sequence' => 'nullable|integer|min:1',
         ]);
 
-        $company = Company::updateOrCreate(
-            ['id' => $user->fk_company],
+        $company = Companies::updateOrCreate(
+            ['id' => $user->companies_id],
             $request->only(['name', 'address', 'phone', 'email', 'invoice_sequence'])
         );
 
         // Si el usuario aún no tiene compañía, la asociamos
-        if (!$user->fk_company) {
-            $user->fk_company = $company->id;
+        if (!$user->companies_id) {
+            $user->companies_id = $company->id;
             $user->save();
         }
 

@@ -58,4 +58,15 @@ class Product extends Model
 	{
 		return $this->belongsTo(Department::class);
 	}
+
+	public function prices()
+	{
+   		return $this->hasMany(ProductPrice::class);
+	}
+	public function units()
+	{
+		return $this->hasMany(ProductUnit::class);
+	}
+
+	
 }

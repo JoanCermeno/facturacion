@@ -26,20 +26,12 @@ use Illuminate\Database\Eloquent\Model;
 class ProductPrice extends Model
 {
 	protected $table = 'product_prices';
-	public $timestamps = false;
-
-	protected $casts = [
-		'product_id' => 'int',
-		'price_type_id' => 'int',
-		'amount' => 'float',
-		'currency_id' => 'int'
-	];
 
 	protected $fillable = [
-		'product_id',
-		'price_type_id',
-		'amount',
-		'currency_id'
+		'product_unit_id',
+        'price_type_id',
+        'price_usd',
+        'profit_percentage',
 	];
 
 	public function product()
@@ -47,13 +39,20 @@ class ProductPrice extends Model
 		return $this->belongsTo(Product::class);
 	}
 
-	public function price_type()
-	{
-		return $this->belongsTo(PriceType::class);
-	}
-
 	public function currency()
 	{
 		return $this->belongsTo(Currency::class);
 	}
+
+	 public function unit()
+    {
+        return $this->belongsTo(ProductUnit::class, 'product_unit_id');
+    }
+
+    public function priceType()
+    {
+        return $this->belongsTo(PriceType::class);
+    }
+
+
 }

@@ -13,7 +13,7 @@ class SellerController extends Controller
         $user = $request->user();
 
         // Verificar que el usuario tenga empresa
-        if (!$user->fk_company) {
+        if (!$user->companies_id) {
             return response()->json(['message' => 'Debes tener una empresa registrada antes de añadir vendedores.'], 403);
         }
 
@@ -29,10 +29,11 @@ class SellerController extends Controller
             'commission' => 'required|numeric|min:0|max:100',
         ]);
 
-        // Asociar vendedor a la empresa del admin
-        $data['company_id'] = $user->fk_company;
-
+        // Asociar vendedor a la empresa del admin    
+        $data['companies_id'] = $user->companies_id;
+  
         $seller = Seller::create($data);
+       
 
         return response()->json([
             'message' => 'Vendedor registrado correctamente ✅',
@@ -45,11 +46,11 @@ class SellerController extends Controller
     {
         $user = $request->user();
 
-        if (!$user->fk_company) {
+        if (!$user->companies_id) {
             return response()->json(['message' => 'No tienes empresa asociada.'], 403);
         }
 
-        $sellers = Seller::where('company_id', $user->fk_company)->get();
+        $sellers = Seller::where('companies_id', $user->companies_id)->get();
 
         return response()->json($sellers);
     }

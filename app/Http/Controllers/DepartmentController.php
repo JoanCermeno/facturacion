@@ -12,11 +12,11 @@ class DepartmentController extends Controller
     {
         $user = $request->user();
 
-        if (!$user->fk_company) {
+        if (!$user->companies_id) {
             return response()->json(['message' => 'No tienes una empresa asociada.'], 403);
         }
 
-        $departments = Department::where('company_id', $user->fk_company)->get();
+        $departments = Department::where('companies_id', $user->companies_id)->get();
 
         return response()->json($departments);
     }
@@ -26,7 +26,7 @@ class DepartmentController extends Controller
     {
         $user = $request->user();
 
-        if (!$user->fk_company) {
+        if (!$user->companies_id) {
             return response()->json(['message' => 'Debes tener una empresa registrada.'], 403);
         }
 
@@ -36,7 +36,7 @@ class DepartmentController extends Controller
             'type'        => 'in:service,unit',
         ]);
 
-        $data['company_id'] = $user->fk_company;
+        $data['companies_id'] = $user->companies_id;
 
         $department = Department::create($data);
 
@@ -51,7 +51,7 @@ class DepartmentController extends Controller
     {
         $user = $request->user();
 
-        $department = Department::where('company_id', $user->fk_company)->findOrFail($id);
+        $department = Department::where('companies_id', $user->companies_id)->findOrFail($id);
 
         $data = $request->validate([
             'description' => 'sometimes|string|max:255',
@@ -71,7 +71,7 @@ class DepartmentController extends Controller
     {
         $user = $request->user();
 
-        $department = Department::where('company_id', $user->fk_company)->findOrFail($id);
+        $department = Department::where('companies_id', $user->companies_id)->findOrFail($id);
    
         $department->delete();
 
