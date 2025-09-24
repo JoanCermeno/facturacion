@@ -10,10 +10,13 @@ class ProductController extends Controller
     // 🔹 Listar productos (solo datos básicos, sin relaciones pesadas)
     public function index()
     {
-        $products = Product::select('id', 'code', 'name', 'description', 'cost_usd', 'base_unit')
+        $products = Product::select('id', 'code', 'name', 'description', 'cost_usd', 'base_unit','companies_id', 'department_id' )
             ->get();
 
-        return response()->json($products);
+        return response()->json([
+            'message' => 'Productos obtenidos correctamente ✅',
+            'products' => $products
+        ]);
     }
 
     // 🔹 Crear un producto
@@ -32,7 +35,10 @@ class ProductController extends Controller
             'units.prices.priceType'
         ]);
 
-        return response()->json($product);
+        return response()->json([ 
+            'message' => 'Productos guardados correctamente ✅',
+            'product'  => $product    
+        ]);
     }
 
     // 🔹 Actualizar un producto

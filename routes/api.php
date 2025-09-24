@@ -41,10 +41,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Si mantienes rutas separadas, considera usar PATCH si solo modificas una parte.
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
     
-    // Rutas para la gestión de la compañía del usuario (admin)
-    Route::get('/company', [CompaniesController::class, 'show']); // Mostrar datos de la compañía del admin
-    Route::put('/company', [CompaniesController::class, 'update']); // Crear/Actualizar datos de la compañía del admin
-
+    // Rutas para la gestión de la compañía del usuario (admin, o duenio de la empresa)
+    Route::apiResource('companies', CompaniesController::class)->only(['show','update']);
+    Route::get('/my-company', [CompaniesController::class, 'myCompany']);
+    Route::put('/my-company', [CompaniesController::class, 'updateMyCompany']);
 
     Route::get('/sellers', [SellerController::class, 'index']);   // Listar vendedores
     Route::post('/sellers', [SellerController::class, 'store']); // Crear vendedor
@@ -59,8 +59,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/departments', [DepartmentController::class, 'store']);  // Crear departamento
     Route::put('/departments/{id}', [DepartmentController::class, 'update']); // Editar departamento
     Route::delete('/departments/{id}', [DepartmentController::class, 'destroy']); // Borrar departamento
+    //* estas rutas de aqui abajo fueron creadas con el flag --api, lo cual nos deja todo el crud muy simplifacod
 
     Route::apiResource('currencies', CurrencyController::class);
     //productos routes
     Route::apiResource('products', ProductController::class);
+
 });

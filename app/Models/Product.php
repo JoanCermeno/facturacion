@@ -8,6 +8,8 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 
 /**
  * Class Product
@@ -32,9 +34,10 @@ class Product extends Model
 {
 	protected $table = 'products';
 
+	use HasFactory;
+
 	protected $casts = [
-		'price' => 'float',
-		'stock' => 'int',
+		'cost_usd' => 'float',
 		'company_id' => 'int',
 		'department_id' => 'int'
 	];
@@ -42,9 +45,8 @@ class Product extends Model
 	protected $fillable = [
 		'code',
 		'description',
-		'price',
-		'unit_type',
-		'stock',
+		'cost_usd',
+		'base_unit',
 		'company_id',
 		'department_id'
 	];
