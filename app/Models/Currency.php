@@ -22,11 +22,23 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Currency extends Model
 {
-	protected $table = 'currencies';
+    protected $table = 'currencies';
 
-	protected $casts = [
-		'exchange_rate' => 'float'
-	];
+    protected $casts = [
+        'exchange_rate' => 'float',
+        'is_base' => 'boolean',
+    ];
 
-	protected $fillable = ['name', 'symbol', 'exchange_rate'];
+    protected $fillable = [
+        'companies_id',
+        'name',
+        'symbol',
+        'exchange_rate',
+        'is_base',
+    ];
+
+    public function company()
+    {
+        return $this->belongsTo(Companies::class, 'companies_id');
+    }
 }

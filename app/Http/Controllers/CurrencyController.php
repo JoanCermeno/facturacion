@@ -7,51 +7,59 @@ use Illuminate\Http\Request;
 
 class CurrencyController extends Controller
 {
-    // 📌 Listar todas las monedas
     public function index()
     {
-        return response()->json(Currency::all(), 200);
+        $currencies = Currency::where('companies_id', auth()->user()->companies_id)->get();
+
+        return response()->json([
+            'message' => 'Monedas obtenidas correctamente ✅',
+            'currencies' => $currencies
+        ], 200);
     }
 
-    // 📌 Crear una nueva moneda
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'          => 'required|string|max:50|unique:currencies,name',
-            'symbol'        => 'required|string|max:5|unique:currencies,symbol',
+            'name' => 'required|string|max:50',
+            'symbol' => 'required|string|max:5',
             'exchange_rate' => 'required|numeric|min:0',
+            'is_base' => 'boolean',
         ]);
+
+        $validated['companies_id'] = auth()->user()->companies_id;
 
         $currency = Currency::create($validated);
 
-        return response()->json($currency, 201);
+        return response()->json([
+            'message' => 'Moneda creada correctamente ✅',
+            'currency' => $currency
+        ], 201);
     }
 
-    // 📌 Mostrar una moneda específica
-    public function show(Currency $currency)
-    {
-        return response()->json($currency, 200);
-    }
-
-    // 📌 Actualizar moneda
     public function update(Request $request, Currency $currency)
     {
-        $validated = $request->validate([
-            'name'          => 'sometimes|string|max:50|unique:currencies,name,' . $currency->id,
-            'symbol'        => 'sometimes|string|max:5|unique:currencies,symbol,' . $currency->id,
-            'exchange_rate' => 'sometimes|numeric|min:0',
-        ]);
+        // Validar que la moneda pertenece a la empresa del usuario
+        if ($currency->companies_id !== auth()->user()->companies_id) { 
+            return response()->json(['message' => 'No autorizado 🚫'], 403);
+        }
 
-        $currency->update($validated);
+        $currency->update($request->all());
 
-        return response()->json($currency, 200);
+        return response()->json([
+            'message' => 'Moneda actualizada correctamente ✅',
+            'currency' => $currency
+        ], 200);
     }
 
-    // 📌 Eliminar moneda
     public function destroy(Currency $currency)
     {
+        // Validar que la moneda pertenece a la empresa del usuario
+        if ($currency->companies_id !== auth()->user()->companies_id) {
+            return response()->json(['message' => 'No autorizado 🚫'], 403);
+        }
+
         $currency->delete();
 
-        return response()->json(null, 204);
+        return response()->json(['message' => 'Moneda eliminada correctamente ✅'], 200);
     }
 }

@@ -2,34 +2,40 @@
 
 namespace Database\Seeders;
 
+use App\Models\Companies;
+use App\Models\Currency;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-
 class CurrencySeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('currencies')->insert([
+        $company = Companies::first() ?? Companies::factory()->create();
+
+        Currency::insert([
             [
-                'symbol' => 'USD',
+                'companies_id' => $company->id,
                 'name' => 'Dólar Americano',
-                'exchange_rate' => 1.00,
+                'symbol' => 'USD',
+                'exchange_rate' => 1,
                 'is_base' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'symbol' => 'VES',
+                'companies_id' => $company->id,
                 'name' => 'Bolívar Venezolano',
-                'exchange_rate' => 36.50,
+                'symbol' => 'VES',
+                'exchange_rate' => 36.5,
                 'is_base' => false,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'symbol' => 'COP',
+                'companies_id' => $company->id,
                 'name' => 'Peso Colombiano',
-                'exchange_rate' => 4200.00,
+                'symbol' => 'COP',
+                'exchange_rate' => 4200,
                 'is_base' => false,
                 'created_at' => now(),
                 'updated_at' => now(),

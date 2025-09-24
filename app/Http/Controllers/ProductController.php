@@ -22,8 +22,26 @@ class ProductController extends Controller
     // 🔹 Crear un producto
     public function store(Request $request)
     {
-        $product = Product::create($request->all());
-        return response()->json($product, 201);
+        $user = $request->user();
+       
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'department_id' => 'nullable|exists:departments,id',
+            'code' => 'required|string|unique:products,code',
+            'description' => 'nullable|string',
+            'cost_usd' => 'required|numeric',
+            'base_unit' => 'required|in:unit,service',
+        ]);
+
+        // 🔹 Vincular automáticamente con la empresa del usuario
+        $validated['companies_id'] = $user->companies_id;
+
+        $product = Product::create($validated);
+
+        return response()->json([
+            'message' => 'Producto registrado correctamente ✅',
+            'product' => $product
+        ], 201);
     }
 
     // 🔹 Mostrar un producto en detalle (con unidades y precios)
@@ -45,13 +63,20 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $product->update($request->all());
-        return response()->json($product, 200);
+
+        return response()->json([
+            'message' => 'Producto actualizado correctamente ✅',
+            'product' => $product
+        ], 200);
     }
 
     // 🔹 Eliminar un producto
     public function destroy(Product $product)
     {
         $product->delete();
-        return response()->json(null, 204);
+
+        return response()->json([
+            'message' => 'Producto eliminado correctamente 🗑️'
+        ], 200);
     }
 }

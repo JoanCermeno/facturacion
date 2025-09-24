@@ -38,16 +38,17 @@ class Product extends Model
 
 	protected $casts = [
 		'cost_usd' => 'float',
-		'company_id' => 'int',
+		'companies_id' => 'int',
 		'department_id' => 'int'
 	];
 
 	protected $fillable = [
 		'code',
+		'name',
 		'description',
 		'cost_usd',
 		'base_unit',
-		'company_id',
+		'companies_id',
 		'department_id'
 	];
 
