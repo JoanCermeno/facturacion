@@ -12,7 +12,7 @@ Desarrollar una aplicación tipo **POS (punto de venta)** para que un usuario pr
     - Precio al mayor.
     - Precio al detal.
 - Manejar **facturación y notas de entrega**:
-  - Identificar cuáles facturas son fiscales y cuáles son solo notas de entrega.
+  - Identificar cuáles facturas son fiscales y cuáles son solo notas de entrega.(Ojo sin emitir acturas fiscales)
 - Llevar **control de stock e inventario** de productos físicos.
 - Generar **reportes de ventas y ganancias**.
 - Manejar diferentes **monedas** según la configuración de la empresa (dólares, bolívares, pesos colombianos).
@@ -34,9 +34,9 @@ Desarrollar una aplicación tipo **POS (punto de venta)** para que un usuario pr
 ---
 
 ### 2. Controladores implementados
-- **AuthController** → Registro, login y logout de usuarios.  
-- **ProfileController** → Gestión del perfil y cambio de contraseña.  
-- **CompaniesController** → Mostrar y actualizar datos de la empresa.  
+- **AuthController** → Registro, login y logout de usuarios.  (Aquellos que podrán iniciar sesión )
+- **ProfileController** → Gestión del perfil y cambio de contraseña.
+- **CompaniesController** → Mostrar y actualizar datos de la empresa. 
 - **SellerController** → Gestión de vendedores.  
 - **CashierController** → Gestión de cajeros.  
 - **DepartmentController** → CRUD de departamentos.  
@@ -59,17 +59,20 @@ Desarrollar una aplicación tipo **POS (punto de venta)** para que un usuario pr
 - `PUT /profile/password` → Cambiar contraseña.  
 
 #### 🏢 Empresa
-- `GET /company` → Mostrar datos de la empresa.  
-- `PUT /company` → Actualizar datos de la empresa.  
+- `GET /companies` → Mostrar datos de la empresa.  (Solo la que el usuario que está conectado es dueño o tiene permiso de leer, ejemplo un admin solo puede ver y editar los datos de su empresa la que el mismo creo)
+- `PUT /companies` → Actualizar datos de la empresa.  (A la que el usuario tenga permiso )
+- `GET /companies/{id}` right arrow puedes ver cómo un súper admin la empresa registrada por id. Esto es para un futuro master que pueda observar todo el sistema...
 
 #### 🧑‍💼 Vendedores
-- `GET /sellers` → Listar vendedores.  
-- `POST /sellers` → Crear vendedor.  
+- `GET /sellers` → Listar vendedores. 
+- `POST /sellers` → Crear vendedor. 
+##### Observación de estas rutas.
+- son rutas protegidas que requieren autenticación y que toman como referencia la empresa a la que pertenece el subsidio que está con la session iniciada mediante el token 
 
 #### 💳 Cajeros
 - `GET /cashiers` → Listar cajeros.  
 - `POST /cashiers` → Crear cajero.  
-
+-estás rutas comparten la misma cualidad de las rutas de vendedores 👆ver lss observaciones de las rutas de los vendedores 
 #### 🗂 Departamentos
 - `GET /departments` → Listar departamentos.  
 - `POST /departments` → Crear departamento.  
@@ -87,7 +90,7 @@ Desarrollar una aplicación tipo **POS (punto de venta)** para que un usuario pr
 ## 🚧 Pendientes por implementar
 - Facturación (notas de entrega y facturas fiscales).  
 - Reportes de ventas.  
-- Control de inventario.  
+- Control de inventario.  👈👈
 - Presentaciones de productos (caja, bulto, paquete).  
 - Integración de múltiples precios (crédito, mayor, detal).  
 
@@ -97,7 +100,96 @@ Desarrollar una aplicación tipo **POS (punto de venta)** para que un usuario pr
 - [x] **AuthTest** → registro y login de usuario.  
 - [x] **SellerTest** → creación de vendedores.  
 - [x] **CompaniesTest** → creación de empresas.  
-- [ ] **CurrenciesTest** → pendiente.  
-- [ ] **DepartmentsTest** → pendiente.  
-- [ ] **CashiersTest** → pendiente.  
-- [ ] **ProductsTest** → pendiente.  
+- [x] **CurrenciesTest** → completado.  
+- [x] **DepartmentsTest** → Creacion comletada.  
+- [x] **CashiersTest** → Creacion completada.  
+- [x] **ProductsTest** → Realizado.  
+
+
+
+
+## 📋 Plan de trabajo para hoy (Inventario)
+
+### 1. **Diseño de tabla `inventories`**
+
+Necesitamos guardar:
+
+- `id`
+    
+- `product_id` → relación con productos.
+    
+- `companies_id` → para filtrar por empresa del usuario autenticado.
+    
+- `stock` → cantidad disponible.
+    
+- `min_stock` (opcional) → para alertas de inventario bajo.
+    
+- `created_at`
+    
+- `updated_at`
+    
+
+👉 En Laravel:
+php artisan make:migration create_inventories_table
+### 2. **Modelo `Inventory`**
+
+- Relación `belongsTo(Product::class)`
+    
+- Relación `belongsTo(Company::class)`
+### 3. **Controlador `InventoryController`**
+
+Endpoints básicos:
+
+- `GET /inventories` → listar inventarios de la empresa.
+    
+- `POST /inventories` → registrar inventario inicial de un producto.
+    
+- `PUT /inventories/{id}` → actualizar stock o mínimo permitido.
+    
+- `DELETE /inventories/{id}` → eliminar registro de inventario (ej: si borras un producto).
+
+### 4. **Rutas**
+
+En `api.php`:
+
+`apiResource('inventories', InventoryController::class);`
+
+
+### 5. **Resource `InventoryResource`**
+
+Para devolver respuestas uniformes:
+
+
+`php artisan`
+
+Campos que devuelves: `id, product_id, stock, min_stock, companies_id`.
+
+
+### 6. **Tests (Pest)**
+
+Archivo: `tests/Feature/InventoryTest.php`
+
+Casos:
+
+- ✅ Un admin puede **crear inventario** para un producto.
+    
+- ✅ Un admin puede **listar inventario** de su empresa.
+    
+- ✅ Un admin puede **actualizar inventario** (ej: stock).
+    
+- ✅ Un admin puede **eliminar inventario**.
+    
+
+---
+
+### 7. **Prueba manual en Postman/Insomnia**
+
+- Crear un producto.
+    
+- Crear inventario para ese producto.
+    
+- Listar inventarios → debe mostrar solo los de la empresa autenticada.
+    
+- Editar stock.
+    
+- Eliminar inventario.
