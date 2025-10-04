@@ -10,7 +10,7 @@ class ProductController extends Controller
     // 🔹 Listar productos (solo datos básicos, sin relaciones pesadas)
     public function index()
     {
-        $products = Product::select('id', 'code', 'name', 'description', 'cost_usd', 'base_unit','companies_id', 'department_id' )
+        $products = Product::select('id', 'code', 'name', 'description', 'cost_usd', 'base_unit' , 'stock','companies_id', 'department_id' )
             ->get();
 
         return response()->json([

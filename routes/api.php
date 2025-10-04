@@ -10,6 +10,7 @@ use App\Http\Controllers\CashierController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\InventoryOperationController;
 
 // Rutas de Autenticación
 Route::prefix('auth')->group(function () {
@@ -64,5 +65,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('currencies', CurrencyController::class);
     //productos routes
     Route::apiResource('products', ProductController::class);
+    Route::apiResource('inventory-operations', InventoryOperationController::class);
 
 });

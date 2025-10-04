@@ -48,6 +48,7 @@ class Product extends Model
 		'description',
 		'cost_usd',
 		'base_unit',
+		'stock',
 		'companies_id',
 		'department_id'
 	];
