@@ -142,22 +142,22 @@ class InventoryOperationController extends Controller
         return response()->json($inventoryOperation->load('details'));
     }
 
-    public function update(Request $request, InventoryOperation $inventoryOperation)
-    {
-        $inventoryOperation->update($request->all());
+    // public function update(Request $request, InventoryOperation $inventoryOperation)
+    // {
+    //     $inventoryOperation->update($request->all());
 
-        return response()->json([
-            'message' => 'Operación actualizada correctamente ✅',
-            'operation' => $inventoryOperation,
-        ]);
-    }
+    //     return response()->json([
+    //         'message' => 'Operación actualizada correctamente ✅',
+    //         'operation' => $inventoryOperation,
+    //     ]);
+    // }
 
-    public function destroy(InventoryOperation $inventoryOperation)
-    {
-        $inventoryOperation->delete();
+    // public function destroy(InventoryOperation $inventoryOperation)
+    // {
+    //     $inventoryOperation->delete();
 
-        return response()->json([
-            'message' => 'Operación eliminada correctamente ✅',
-        ]);
-    }
+    //     return response()->json([
+    //         'message' => 'Operación eliminada correctamente ✅',
+    //     ]);
+    // }
 }
