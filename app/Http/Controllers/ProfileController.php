@@ -45,7 +45,7 @@ class ProfileController extends Controller
 
         // Verificar contraseña actual
         if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json(['error' => 'La contraseña actual no es correcta'], 422);
+            return response()->json(['error' => 'La contraseña actual no es correcta', 'message' => 'La contrasenia Actual es incorrecta'], 422);
         }
 
         // Guardar nueva contraseña

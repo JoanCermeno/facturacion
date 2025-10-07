@@ -17,12 +17,13 @@ test('un admin puede ver todos los productos que le pertenecen a su empresa', fu
         'companies_id' => $company->id,
     ]);
 
-    //cargamos los productos a la empresa
+    $department = Department::factory()->create([
+        'companies_id' => $company->id,
+    ]);
+
     $product = Product::factory()->create([
         'companies_id' => $company->id,
-        'department_id' => Department::factory()->create([
-            'companies_id' => $company->id,
-        ]),
+        'department_id' => $department->id,
     ]);
 
     $response = $this->actingAs($admin)->getJson('/api/products');
@@ -30,20 +31,45 @@ test('un admin puede ver todos los productos que le pertenecen a su empresa', fu
     $response->assertStatus(200)
         ->assertJson([
             'message' => 'Productos obtenidos correctamente ✅',
+        ])
+        ->assertJsonStructure([
+            'message',
             'products' => [
-                [
-                    'id' => $product->id,
-                    'code' => $product->code,
-                    'description' => $product->description,
-                    'cost_usd' => $product->cost_usd,
-                    'base_unit' => $product->base_unit,
-                    'companies_id' => $product->companies_id,
-                    'department_id' => $product->department_id,
+                'current_page',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'companies_id',
+                        'department_id',
+                        'code',
+                        'name',
+                        'description',
+                        'cost_usd',
+                        'stock',
+                        'base_unit',
+                        'created_at',
+                        'updated_at',
+                        'department'
+                    ]
                 ],
-            ],
+                'first_page_url',
+                'from',
+                'last_page',
+                'last_page_url',
+                'links',
+                'next_page_url',
+                'path',
+                'per_page',
+                'prev_page_url',
+                'to',
+                'total'
+            ]
         ]);
 
+    // y opcionalmente verificar que tu producto sí está en la página
+    $this->assertEquals($product->id, $response['products']['data'][0]['id']);
 });
+
 
 test('un admin puede crear un producto', function () {
     $company = Companies::factory()->create();

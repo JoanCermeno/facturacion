@@ -8,15 +8,25 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
     // 🔹 Listar productos (solo datos básicos, sin relaciones pesadas)
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::select('id', 'code', 'name', 'description', 'cost_usd', 'base_unit' , 'stock','companies_id', 'department_id' )
-            ->get();
+        $user = $request->user();
+
+        if (!$user->companies_id) {
+            return response()->json(['message' => 'No tienes empresa asociada.'], 403);
+        }
+
+        // decides cuántos por página: puedes dejar fijo o permitir query param
+        $perPage = $request->input('per_page', 15);  // 15 por página por defecto
+
+        $products = Product::where('companies_id', $user->companies_id)
+                        ->with('department') // si tienes relación
+                        ->paginate($perPage);
 
         return response()->json([
             'message' => 'Productos obtenidos correctamente ✅',
             'products' => $products
-        ]);
+        ], 200);
     }
 
     // 🔹 Crear un producto
