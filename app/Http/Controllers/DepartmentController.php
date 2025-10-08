@@ -54,6 +54,7 @@ class DepartmentController extends Controller
         $department = Department::where('companies_id', $user->companies_id)->findOrFail($id);
 
         $data = $request->validate([
+            'code'        => 'required|string|max:50|unique:departments,code',
             'description' => 'sometimes|string|max:255',
             'type'        => 'nullable|in:service,unit',
         ]);
