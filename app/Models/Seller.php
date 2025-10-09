@@ -25,6 +25,7 @@ class Seller extends Model
 {
 	protected $table = 'sellers';
 	public $timestamps = false;
+	
 
 	protected $casts = [
 		'commission' => 'float',

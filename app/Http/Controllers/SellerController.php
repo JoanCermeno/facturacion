@@ -54,4 +54,13 @@ class SellerController extends Controller
 
         return response()->json($sellers);
     }
+    // eliminar vendedor
+   public function destroy(Seller $seller)
+    {
+        $seller->delete();
+
+        return response()->json([
+            'message' => 'Vendedor eliminado correctamente 🗑️'
+        ], 200);
+    }
 }

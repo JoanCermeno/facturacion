@@ -49,7 +49,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/sellers', [SellerController::class, 'index']);   // Listar vendedores
     Route::post('/sellers', [SellerController::class, 'store']); // Crear vendedor
-
+    Route::delete('/sellers/{seller}', [SellerController::class, 'destroy']); // Borrar vendedor
+    
     // Rutas para la gestión de los cajeros
     Route::get('/cashiers', [CashierController::class, 'index']);
     Route::post('/cashiers', [CashierController::class, 'store']);
