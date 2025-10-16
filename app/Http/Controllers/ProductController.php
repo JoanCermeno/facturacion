@@ -39,7 +39,7 @@ class ProductController extends Controller
             'department_id' => 'nullable|exists:departments,id',
             'code' => 'required|string|unique:products,code',
             'description' => 'nullable|string',
-            'cost_usd' => 'required|numeric',
+            'cost' => 'required|numeric',
             'base_unit' => 'required|in:unit,service',
         ]);
 

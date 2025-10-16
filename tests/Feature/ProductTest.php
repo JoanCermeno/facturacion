@@ -44,7 +44,7 @@ test('un admin puede ver todos los productos que le pertenecen a su empresa', fu
                         'code',
                         'name',
                         'description',
-                        'cost_usd',
+                        'cost',
                         'stock',
                         'base_unit',
                         'created_at',
@@ -87,7 +87,7 @@ test('un admin puede crear un producto', function () {
         'code' => '123456789',
         'name' => 'Producto 1',
         'description' => 'Descripción del producto 1',
-        'cost_usd' => 100,
+        'cost' => 100,
         'base_unit' => 'unit',
         'companies_id' => $company->id,
         'department_id' => $departament_id]);
@@ -98,7 +98,7 @@ test('un admin puede crear un producto', function () {
             'code' => '123456789',
             'name' => 'Producto 1',
             'description' => 'Descripción del producto 1',
-            'cost_usd' => 100,
+            'cost' => 100,
             'base_unit' => 'unit',
             'companies_id' => $company->id,
             'department_id' => $departament_id,
@@ -128,7 +128,7 @@ test('un admin puede actualizar un producto', function () {
     $response = $this->actingAs($admin)->putJson("/api/products/{$product->id}", [
         'name' => 'Producto Actualizado',
         'description' => 'Nueva descripción del producto',
-        'cost_usd' => 150,
+        'cost' => 150,
         'base_unit' => 'box',
     ]);
 
@@ -139,7 +139,7 @@ test('un admin puede actualizar un producto', function () {
                 'id' => $product->id,
                 'name' => 'Producto Actualizado',
                 'description' => 'Nueva descripción del producto',
-                'cost_usd' => 150,
+                'cost' => 150,
                 'base_unit' => 'box',
                 'companies_id' => $company->id,
                 'department_id' => $department->id,
@@ -150,7 +150,7 @@ test('un admin puede actualizar un producto', function () {
         'id' => $product->id,
         'name' => 'Producto Actualizado',
         'description' => 'Nueva descripción del producto',
-        'cost_usd' => 150,
+        'cost' => 150,
         'base_unit' => 'box',
     ]);
 });

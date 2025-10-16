@@ -17,14 +17,22 @@ class ProductsSeeder extends Seeder
         // =============================
         $sardinaId = DB::table('products')->insertGetId([
             'companies_id' => 1,
-            'department_id' => null,
+            'department_id' => DB::table('departments')->insertGetId([
+                'companies_id' => 1,
+                'code' => 'DEP-001',
+                'description' => 'Viveres',
+                'type' => 'unit',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]),
             'code' => 'PRD-001',
             'name' => 'Sardinas en Lata',
             'description' => 'Lata de sardinas en aceite vegetal',
-            'cost_usd' => 0.80,
+            'cost' => 0.80,
             'base_unit' => 'unit',
             'created_at' => now(),
             'updated_at' => now(),
+
         ]);
 
         DB::table('product_units')->insert([
@@ -38,11 +46,11 @@ class ProductsSeeder extends Seeder
         // =============================
         $aceiteId = DB::table('products')->insertGetId([
             'companies_id' => 1,
-            'department_id' => null,
+            'department_id' => 1,
             'code' => 'PRD-002',
             'name' => 'Aceite 20W50',
             'description' => 'Aceite de motor 20W50 galón',
-            'cost_usd' => 8.00,
+            'cost' => 8.00,
             'base_unit' => 'lt',
             'created_at' => now(),
             'updated_at' => now(),
@@ -58,11 +66,11 @@ class ProductsSeeder extends Seeder
         // =============================
         $arrozId = DB::table('products')->insertGetId([
             'companies_id' => 1,
-            'department_id' => null,
+            'department_id' => 1,
             'code' => 'PRD-003',
             'name' => 'Arroz Blanco',
             'description' => 'Arroz de grano largo',
-            'cost_usd' => 0.50,
+            'cost' => 0.50,
             'base_unit' => 'kg',
             'created_at' => now(),
             'updated_at' => now(),
@@ -79,11 +87,11 @@ class ProductsSeeder extends Seeder
         // =============================
         $aguaId = DB::table('products')->insertGetId([
             'companies_id' => 1,
-            'department_id' => null,
+            'department_id' => 1,
             'code' => 'PRD-004',
             'name' => 'Agua Mineral',
             'description' => 'Botella de agua mineral 500ml',
-            'cost_usd' => 0.30,
+            'cost' => 0.30,
             'base_unit' => 'unit',
             'created_at' => now(),
             'updated_at' => now(),

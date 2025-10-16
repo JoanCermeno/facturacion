@@ -20,7 +20,7 @@ class ProductPricesSeeder extends Seeder
             $product = DB::table('products')->where('id', $unit->product_id)->first();
 
             // Precio base en función del costo y conversión
-            $baseCost = $product->cost_usd * $unit->conversion_factor;
+            $baseCost = $product->cost * $unit->conversion_factor;
 
             // Insertar precios por cada tipo
             DB::table('product_prices')->insert([

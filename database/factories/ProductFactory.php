@@ -20,7 +20,7 @@ class ProductFactory extends Factory
             'code' => strtoupper($this->faker->unique()->lexify('DEP???')),
             'name' => $this->faker->word(),
             'description' => $this->faker->word(),
-            'cost_usd' => $this->faker->randomFloat(2, 0, 100),
+            'cost' => $this->faker->randomFloat(2, 0, 100),
             'base_unit' => $this->faker->randomElement(['unit', 'service','box','pack','pair','dozen','kg','gr','lb','oz','lt','ml','gal','m','cm','mm','inch','sqm','sqft','hour','day','service']),
             
         ];

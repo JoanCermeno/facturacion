@@ -46,7 +46,7 @@ class Product extends Model
 		'code',
 		'name',
 		'description',
-		'cost_usd',
+		'cost',
 		'base_unit',
 		'stock',
 		'companies_id',

@@ -10,12 +10,12 @@ return new class extends Migration {
        Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->foreignId('companies_id')->constrained()->onDelete('cascade');
-            $table->foreignId('department_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('department_id')->constrained()->onDelete('restrict');
             $table->string('code');
             $table->unique(['companies_id', 'code']); // Unicidad por empresa
             $table->string('name');
             $table->text('description')->nullable();
-            $table->decimal('cost_usd', 12, 2)->default(0);
+            $table->decimal('cost', 12, 2)->default(0);
             $table->enum('base_unit', [
                 'unit', 'box', 'pack', 'pair', 'dozen',
                 'kg', 'gr', 'lb', 'oz',
