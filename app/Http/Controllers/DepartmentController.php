@@ -51,14 +51,23 @@ class DepartmentController extends Controller
     {
         $user = $request->user();
 
+        // 1. Encontrar el departamento (asegura que existe y pertenece a la compañía)
         $department = Department::where('companies_id', $user->companies_id)->findOrFail($id);
 
-        $data = $request->validate([
-            'code'        => 'string|max:50|unique:departments,code',
-            'description' => 'sometimes|string|max:255',
-            'type'        => 'nullable|in:service,unit',
-        ]);
+        // 2. Definir las reglas de validación
+        $rules = [
+            // 🚀 CAMBIO CLAVE AQUÍ: Ignorar el ID actual ($id)
+            // Sintaxis: unique:table,column,except,idColumn
+            // Donde 'except' es el valor a ignorar (el $id de la URL)
+            'code'          => 'string|max:50|unique:departments,code,' . $id,
+            
+            'description'   => 'sometimes|string|max:255',
+            'type'          => 'nullable|in:service,unit',
+        ];
 
+        $data = $request->validate($rules);
+
+        // 3. Actualizar
         $department->update($data);
 
         return response()->json([

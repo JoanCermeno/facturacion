@@ -16,12 +16,22 @@ class ProductController extends Controller
             return response()->json(['message' => 'No tienes empresa asociada.'], 403);
         }
 
-        // decides cuántos por página: puedes dejar fijo o permitir query param
-        $perPage = $request->input('per_page', 15);  // 15 por página por defecto
+        // Parámetros de búsqueda
+        $search = $request->input('search'); // puede ser nombre o código
+        $perPage = $request->input('per_page', 15);
 
-        $products = Product::where('companies_id', $user->companies_id)
-                        ->with('department') // si tienes relación
-                        ->paginate($perPage);
+        $query = Product::where('companies_id', $user->companies_id)
+            ->with('department');
+
+        // 🔍 Aplicar filtro si viene texto de búsqueda
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('code', 'like', "%{$search}%");
+            });
+        }
+
+        $products = $query->paginate($perPage);
 
         return response()->json([
             'message' => 'Productos obtenidos correctamente ✅',
@@ -36,11 +46,11 @@ class ProductController extends Controller
        
         $validated = $request->validate([
             'name' => 'required|string',
-            'department_id' => 'nullable|exists:departments,id',
+            'department_id' => 'required|integer|exists:departments,id',
             'code' => 'required|string|unique:products,code',
             'description' => 'nullable|string',
             'cost' => 'required|numeric',
-            'base_unit' => 'required|in:unit,service',
+            'base_unit' => 'required|in:unit,box,pack,pair,dozen,kg,gr,lb,oz,lt,ml,gal,m,cm,mm,inch,sqm,sqft,hour,day,service',
         ]);
 
         // 🔹 Vincular automáticamente con la empresa del usuario
