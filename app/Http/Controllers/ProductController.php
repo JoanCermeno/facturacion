@@ -51,6 +51,7 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'cost' => 'required|numeric',
             'base_unit' => 'required|in:unit,box,pack,pair,dozen,kg,gr,lb,oz,lt,ml,gal,m,cm,mm,inch,sqm,sqft,hour,day,service',
+            'currency_id' => 'required|exists:currencies,id', // 👈 Para saber a que moneda corresponde el producto
         ]);
 
         // 🔹 Vincular automáticamente con la empresa del usuario

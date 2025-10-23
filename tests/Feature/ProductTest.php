@@ -6,6 +6,7 @@ use App\Models\Department;
 use App\Models\User;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Currency;
 
 uses(RefreshDatabase::class);
 
@@ -73,6 +74,8 @@ test('un admin puede ver todos los productos que le pertenecen a su empresa', fu
 
 test('un admin puede crear un producto', function () {
     $company = Companies::factory()->create();
+     $currency = Currency::factory()->create();
+
 
     $admin = User::factory()->create([
         'role' => 'admin',
@@ -90,7 +93,9 @@ test('un admin puede crear un producto', function () {
         'cost' => 100,
         'base_unit' => 'unit',
         'companies_id' => $company->id,
-        'department_id' => $departament_id]);
+        'department_id' => $departament_id,
+        'currency_id' => $currency->id ]
+    );
 
     $response->assertStatus(201)->assertJson([
         'message' => 'Producto registrado correctamente ✅',

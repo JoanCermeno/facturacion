@@ -72,5 +72,9 @@ class Product extends Model
 		return $this->hasMany(ProductUnit::class);
 	}
 
-	
+	public function currency()
+	{
+		return $this->belongsTo(Currency::class);
+	}
+
 }

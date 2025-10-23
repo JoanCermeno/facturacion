@@ -2,12 +2,13 @@
 
 use App\Models\User;
 use App\Models\Companies;
-use App\Models\Currency;
+use App\Models\Department;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-test('un admin puede ver las monedas de su empresa', function () {
+// 📘 Listar departamentos
+test('un admin puede listar los departamentos de su empresa', function () {
     $company = Companies::factory()->create();
 
     $admin = User::factory()->create([
@@ -15,27 +16,26 @@ test('un admin puede ver las monedas de su empresa', function () {
         'companies_id' => $company->id,
     ]);
 
-    $currency = Currency::create([
+    Department::factory()->create([
         'companies_id' => $company->id,
-        'name' => 'Dólar Americano',
-        'symbol' => 'USD',
-        'exchange_rate' => 1,
-        'is_base' => true,
+        'code' => 'DEP-001',
+        'description' => 'Viveres',
+        'type' => 'unit',
     ]);
 
-    $response = $this->actingAs($admin)->getJson('/api/currencies');
+    $response = $this->actingAs($admin)->getJson('/api/departments');
 
     $response->assertStatus(200)
         ->assertJsonFragment([
-            'name' => 'Dólar Americano',
-            'symbol' => 'USD',
-            'exchange_rate' => 1,
-            'is_base' => true,
+            'code' => 'DEP-001',
+            'description' => 'Viveres',
+            'type' => 'unit',
             'companies_id' => $company->id,
         ]);
 });
 
-test('un admin puede crear una moneda', function () {
+// 📗 Crear un nuevo departamento
+test('un admin puede crear un departamento', function () {
     $company = Companies::factory()->create();
 
     $admin = User::factory()->create([
@@ -43,32 +43,33 @@ test('un admin puede crear una moneda', function () {
         'companies_id' => $company->id,
     ]);
 
-    $response = $this->actingAs($admin)->postJson('/api/currencies', [
-        'name' => 'Bolívar Venezolano',
-        'symbol' => 'VES',
-        'exchange_rate' => 36.5,
-        'is_base' => false,
-    ]);
+    $data = [
+        'code' => 'DEP-002',
+        'description' => 'Ferretería',
+        'type' => 'unit',
+    ];
+
+    $response = $this->actingAs($admin)->postJson('/api/departments', $data);
 
     $response->assertStatus(201)
         ->assertJson([
-            'message' => 'Moneda creada correctamente ✅',
-            'currency' => [
-                'name' => 'Bolívar Venezolano',
-                'symbol' => 'VES',
-                'exchange_rate' => 36.5,
-                'is_base' => false,
+            'message' => 'Departamento creado correctamente ✅',
+            'department' => [
+                'code' => 'DEP-002',
+                'description' => 'Ferretería',
+                'type' => 'unit',
                 'companies_id' => $company->id,
             ]
         ]);
 
-    $this->assertDatabaseHas('currencies', [
-        'symbol' => 'VES',
+    $this->assertDatabaseHas('departments', [
+        'code' => 'DEP-002',
         'companies_id' => $company->id,
     ]);
 });
 
-test('un admin puede actualizar una moneda', function () {
+// 📙 Actualizar un departamento
+test('un admin puede actualizar un departamento', function () {
     $company = Companies::factory()->create();
 
     $admin = User::factory()->create([
@@ -76,30 +77,30 @@ test('un admin puede actualizar una moneda', function () {
         'companies_id' => $company->id,
     ]);
 
-    $currency = Currency::create([
+    $department = Department::factory()->create([
         'companies_id' => $company->id,
-        'name' => 'Peso Colombiano',
-        'symbol' => 'COP',
-        'exchange_rate' => 4200,
-        'is_base' => false,
+        'code' => 'DEP-003',
+        'description' => 'Bebidas',
+        'type' => 'unit',
     ]);
 
-    $response = $this->actingAs($admin)->putJson("/api/currencies/{$currency->id}", [
-        'exchange_rate' => 4300,
+    $response = $this->actingAs($admin)->putJson("/api/departments/{$department->id}", [
+        'description' => 'Bebidas y Refrescos',
     ]);
 
     $response->assertStatus(200)
         ->assertJsonFragment([
-            'exchange_rate' => 4300,
+            'description' => 'Bebidas y Refrescos',
         ]);
 
-    $this->assertDatabaseHas('currencies', [
-        'id' => $currency->id,
-        'exchange_rate' => 4300,
+    $this->assertDatabaseHas('departments', [
+        'id' => $department->id,
+        'description' => 'Bebidas y Refrescos',
     ]);
 });
 
-test('un admin puede eliminar una moneda', function () {
+// 📕 Eliminar un departamento
+test('un admin puede eliminar un departamento', function () {
     $company = Companies::factory()->create();
 
     $admin = User::factory()->create([
@@ -107,22 +108,39 @@ test('un admin puede eliminar una moneda', function () {
         'companies_id' => $company->id,
     ]);
 
-    $currency = Currency::create([
+    $department = Department::factory()->create([
         'companies_id' => $company->id,
-        'name' => 'Euro',
-        'symbol' => 'EUR',
-        'exchange_rate' => 0.9,
-        'is_base' => false,
+        'code' => 'DEP-004',
+        'description' => 'Aseo Personal',
+        'type' => 'unit',
     ]);
 
-    $response = $this->actingAs($admin)->deleteJson("/api/currencies/{$currency->id}");
+    $response = $this->actingAs($admin)->deleteJson("/api/departments/{$department->id}");
 
     $response->assertStatus(200)
         ->assertJson([
-            'message' => 'Moneda eliminada correctamente ✅',
+            'message' => 'Departamento eliminado correctamente 🗑️',
         ]);
 
-    $this->assertDatabaseMissing('currencies', [
-        'id' => $currency->id,
+    $this->assertDatabaseMissing('departments', [
+        'id' => $department->id,
     ]);
+});
+
+// 📒 Validación: no puede crear sin empresa asociada
+test('no se puede crear un departamento sin empresa asociada', function () {
+    $userSinEmpresa = User::factory()->create([
+        'companies_id' => null,
+    ]);
+
+    $response = $this->actingAs($userSinEmpresa)->postJson('/api/departments', [
+        'code' => 'DEP-999',
+        'description' => 'Sin empresa',
+        'type' => 'unit',
+    ]);
+
+    $response->assertStatus(403)
+        ->assertJson([
+            'message' => 'Debes tener una empresa registrada.',
+        ]);
 });

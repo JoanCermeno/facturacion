@@ -21,12 +21,22 @@ class CurrencyFactory extends Factory
      */
     public function definition(): array
     {
+        $currencies = [
+            ['name' => 'Dólar Americano', 'symbol' => 'USD'],
+            ['name' => 'Bolívar Venezolano', 'symbol' => 'VES'],
+            ['name' => 'Peso Colombiano', 'symbol' => 'COP'],
+            ['name' => 'Euro', 'symbol' => 'EUR'],
+        ];
+
+        $currency = $this->faker->randomElement($currencies);
+
         return [
-            'name' => $this->faker->currencyCode(),
-            'symbol' => $this->faker->currencySymbol(),
-            'exchange_rate' => $this->faker->randomFloat(2, 1, 5000),
-            'is_base' => $this->faker->boolean(10), // 10% chance of being the base currency
+            'name' => $currency['name'],
+            'symbol' => $currency['symbol'],
+            'exchange_rate' => $this->faker->randomFloat(2, 0.1, 5000),
+            'is_base' => false,
             'companies_id' => \App\Models\Companies::factory(),
         ];
     }
+
 }

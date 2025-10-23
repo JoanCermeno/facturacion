@@ -7,11 +7,13 @@ use Illuminate\Support\Facades\DB;
 
 class ProductsSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
+        // =======================================================
+        // Toma el ID de la moneda DOLAR AMERICANO COMO BASE.
+        // =======================================================
+        $currencyId = 1;
+
         // =============================
         // Producto 1: Sardinas en lata
         // =============================
@@ -30,15 +32,15 @@ class ProductsSeeder extends Seeder
             'description' => 'Lata de sardinas en aceite vegetal',
             'cost' => 0.80,
             'base_unit' => 'unit',
+            'currency_id' => $currencyId, // 💱 nueva relación
             'created_at' => now(),
             'updated_at' => now(),
-
         ]);
 
         DB::table('product_units')->insert([
-            ['product_id' => $sardinaId, 'unit_type' => 'unit', 'conversion_factor' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['product_id' => $sardinaId, 'unit_type' => 'pack', 'conversion_factor' => 6, 'created_at' => now(), 'updated_at' => now()],
-            ['product_id' => $sardinaId, 'unit_type' => 'box',  'conversion_factor' => 12,'created_at' => now(), 'updated_at' => now()],
+            ['product_id' => $sardinaId, 'unit_type' => 'unit', 'conversion_factor' => 1,  'created_at' => now(), 'updated_at' => now()],
+            ['product_id' => $sardinaId, 'unit_type' => 'pack', 'conversion_factor' => 6,  'created_at' => now(), 'updated_at' => now()],
+            ['product_id' => $sardinaId, 'unit_type' => 'box',  'conversion_factor' => 12, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         // =============================
@@ -52,6 +54,7 @@ class ProductsSeeder extends Seeder
             'description' => 'Aceite de motor 20W50 galón',
             'cost' => 8.00,
             'base_unit' => 'lt',
+            'currency_id' => $currencyId,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -72,6 +75,7 @@ class ProductsSeeder extends Seeder
             'description' => 'Arroz de grano largo',
             'cost' => 0.50,
             'base_unit' => 'kg',
+            'currency_id' => $currencyId,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -93,12 +97,13 @@ class ProductsSeeder extends Seeder
             'description' => 'Botella de agua mineral 500ml',
             'cost' => 0.30,
             'base_unit' => 'unit',
+            'currency_id' => $currencyId,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         DB::table('product_units')->insert([
-            ['product_id' => $aguaId, 'unit_type' => 'box', 'conversion_factor' => 12,  'created_at' => now(), 'updated_at' => now()],
+            ['product_id' => $aguaId, 'unit_type' => 'box', 'conversion_factor' => 12, 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }

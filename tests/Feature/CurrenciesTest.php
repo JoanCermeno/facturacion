@@ -105,13 +105,14 @@ test('un admin puede eliminar una moneda', function () {
         'name' => 'Moneda Temporal',
         'symbol' => 'TMP',
         'exchange_rate' => 10,
+        'is_base' => false,
     ]);
 
     $response = $this->deleteJson("/api/currencies/{$currency->id}");
 
     $response->assertStatus(200)
         ->assertJson([
-            'message' => 'Moneda eliminada correctamente ✅',
+            'message' => 'Moneda eliminada correctamente 🗑️',
         ]);
 
     $this->assertDatabaseMissing('currencies', ['id' => $currency->id]);

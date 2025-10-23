@@ -36,28 +36,47 @@ class CurrencyController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, Currency $currency)
+    public function update(Request $request, $id)
     {
-        // Validar que la moneda pertenece a la empresa del usuario
-        if ($currency->companies_id !== auth()->user()->companies_id) {
-            return response()->json(['message' => 'No autorizado 🚫'], 403);
-        }
+        $currency = Currency::findOrFail($id);
 
         $validated = $request->validate([
-            'name' => 'sometimes|string|max:50',
-            'symbol' => 'sometimes|string|max:5',
+            'name' => 'sometimes|string|max:100',
+            'symbol' => 'sometimes|string|max:10',
             'exchange_rate' => 'sometimes|numeric|min:0',
             'is_base' => 'sometimes|boolean',
         ]);
 
-        // Si la moneda que se actualiza es marcada como base
-        if (isset($validated['is_base']) && $validated['is_base'] === true) {
-            // Desactivar todas las monedas de la empresa
-            Currency::where('companies_id', auth()->user()->companies_id)
-                ->update(['is_base' => false, 'exchange_rate' => 0]);
+        // ⚠️ Validar unicidad del símbolo dentro de la misma empresa (ignorando el actual)
+        if (isset($validated['symbol'])) {
+            $exists = Currency::where('companies_id', auth()->user()->companies_id)
+                ->where('symbol', $validated['symbol'])
+                ->where('id', '!=', $currency->id)
+                ->exists();
 
-            // Establecer esta como la base
-            $validated['exchange_rate'] = 1; // o la tasa que definas como base
+            if ($exists) {
+                return response()->json([
+                    'message' => 'Ya existe otra moneda con este símbolo en tu empresa.'
+                ], 422);
+            }
+        }
+
+        // 🧩 Si el usuario intenta desmarcar la moneda base actual
+        if ($currency->is_base && isset($validated['is_base']) && $validated['is_base'] == false) {
+            $existsAnotherBase = Currency::where('id', '!=', $currency->id)
+                ->where('is_base', true)
+                ->exists();
+
+            if (!$existsAnotherBase) {
+                return response()->json([
+                    'message' => 'Debe existir al menos una moneda base. No puedes dejar todas en falso.'
+                ], 422);
+            }
+        }
+
+        // 🧩 Si se marca una nueva como base, desmarcar las demás
+        if (isset($validated['is_base']) && $validated['is_base'] == true) {
+            Currency::where('id', '!=', $currency->id)->update(['is_base' => false]);
         }
 
         $currency->update($validated);
@@ -65,18 +84,23 @@ class CurrencyController extends Controller
         return response()->json([
             'message' => 'Moneda actualizada correctamente ✅',
             'currency' => $currency
-        ], 200);
+        ]);
     }
 
-    public function destroy(Currency $currency)
+    public function destroy($id)
     {
-        // Validar que la moneda pertenece a la empresa del usuario
-        if ($currency->companies_id !== auth()->user()->companies_id) {
-            return response()->json(['message' => 'No autorizado 🚫'], 403);
+        $currency = Currency::findOrFail($id);
+
+        if ($currency->is_base) {
+            return response()->json([
+                'message' => 'No puedes eliminar la moneda base del sistema.'
+            ], 422);
         }
 
         $currency->delete();
 
-        return response()->json(['message' => 'Moneda eliminada correctamente ✅'], 200);
+        return response()->json([
+            'message' => 'Moneda eliminada correctamente 🗑️'
+        ]);
     }
 }
