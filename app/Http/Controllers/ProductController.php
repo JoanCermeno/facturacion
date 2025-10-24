@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use \App\Models\Companies;
 
 class ProductController extends Controller
 {
@@ -43,16 +44,25 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
-       
-        $validated = $request->validate([
+
+        //Validamos si la empresa tiene seteado el campo de auto generar codigos del producto.
+        $company = Companies::find($user->companies_id);
+        $rules = [
             'name' => 'required|string',
             'department_id' => 'required|integer|exists:departments,id',
-            'code' => 'required|string|unique:products,code',
             'description' => 'nullable|string',
             'cost' => 'required|numeric',
             'base_unit' => 'required|in:unit,box,pack,pair,dozen,kg,gr,lb,oz,lt,ml,gal,m,cm,mm,inch,sqm,sqft,hour,day,service',
-            'currency_id' => 'required|exists:currencies,id', // 👈 Para saber a que moneda corresponde el producto
-        ]);
+            'currency_id' => 'required|exists:currencies,id',
+        ];
+
+        if (!$company->auto_code_products) {
+            //Definimos las reglas de validación en caso de que sea falso, es decir se debe poner el code de producto
+            $rules['code'] = 'required|string|unique:products,code';
+        }
+
+        // 🔹 Validamos si la empresa tiene seteado el campo de auto generar codigos del producto.
+        $validated = $request->validate($rules);
 
         // 🔹 Vincular automáticamente con la empresa del usuario
         $validated['companies_id'] = $user->companies_id;
@@ -83,7 +93,26 @@ class ProductController extends Controller
     // 🔹 Actualizar un producto
     public function update(Request $request, Product $product)
     {
-        $product->update($request->all());
+        $user = $request->user();
+        $company = \App\Models\Companies::find($user->companies_id);
+
+        $rules = [
+            'name' => 'sometimes|string',
+            'department_id' => 'sometimes|integer|exists:departments,id',
+            'description' => 'nullable|string',
+            'cost' => 'sometimes|numeric',
+            'base_unit' => 'sometimes|in:unit,box,pack,pair,dozen,kg,gr,lb,oz,lt,ml,gal,m,cm,mm,inch,sqm,sqft,hour,day,service',
+            'currency_id' => 'sometimes|exists:currencies,id',
+        ];
+
+        if (!$company->auto_code_products) {
+            // Solo si la empresa NO autogenera códigos, entonces se valida el campo `code`
+            $rules['code'] = 'sometimes|string|unique:products,code,' . $product->id;
+        }
+
+        $validated = $request->validate($rules);
+
+        $product->update($validated);
 
         return response()->json([
             'message' => 'Producto actualizado correctamente ✅',

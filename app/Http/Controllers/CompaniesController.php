@@ -41,6 +41,10 @@ class CompaniesController extends Controller
             'rif'              => 'nullable|string|max:255',
             'email'            => ['nullable', 'email', Rule::unique('companies')->ignore($user->companies_id)],
             'invoice_sequence' => 'nullable|integer|min:1',
+            'auto_code_products' => 'nullable|boolean',
+            'auto_code_departments' => 'nullable|boolean',
+            'product_code_prefix' => 'nullable|string|max:255',
+            'department_code_prefix' => 'nullable|string|max:255',
         ]);
 
         $company = Companies::updateOrCreate(
@@ -101,4 +105,25 @@ class CompaniesController extends Controller
             'company' => $company
         ]);
     }
+
+
+    /// 🔹 Subir logo de la empresa
+    public function uploadLogo(Request $request)
+    {
+        $request->validate([
+            'logo' => 'required|image|max:2048',
+        ]);
+        $user = $request->user();
+        $companyId = $user->companies_id;
+        $company = Companies::find($companyId);
+        $company->logo_path = $request->logo->store('public/logos');
+        $company->save();
+
+    
+        return response()->json([
+            'message' => 'Logo actualizado correctamente',
+       
+        ]);
+    }
+
 }

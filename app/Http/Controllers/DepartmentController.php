@@ -30,12 +30,18 @@ class DepartmentController extends Controller
             return response()->json(['message' => 'Debes tener una empresa registrada.'], 403);
         }
 
-        $data = $request->validate([
-            'code'        => 'required|string|max:50|unique:departments,code',
-            'description' => 'required|string|max:255',
-            'type'        => 'in:service,unit',
-        ]);
+        $company = \App\Models\Companies::find($user->companies_id);
 
+        $rules = [
+            'description' => 'required|string|max:255',
+            'type' => 'in:service,unit',
+        ];
+
+        if (!$company->auto_code_departments) {
+            $rules['code'] = 'required|string|max:50|unique:departments,code';
+        }
+
+        $data = $request->validate($rules);
         $data['companies_id'] = $user->companies_id;
 
         $department = Department::create($data);
@@ -45,6 +51,7 @@ class DepartmentController extends Controller
             'department' => $department,
         ], 201);
     }
+
 
     // Editar un departamento
     public function update(Request $request, $id)

@@ -47,6 +47,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('companies', CompaniesController::class)->only(['show','update']);
     Route::get('/my-company', [CompaniesController::class, 'myCompany']);
     Route::put('/my-company', [CompaniesController::class, 'updateMyCompany']);
+    Route::post('/companies/{company}/logo', [CompaniesController::class, 'uploadLogo']);
+
 
     Route::get('/sellers', [SellerController::class, 'index']);   // Listar vendedores
     Route::post('/sellers', [SellerController::class, 'store']); // Crear vendedor
@@ -69,6 +71,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('products', ProductController::class);
     Route::apiResource('inventory-operations', InventoryOperationController::class);
     Route::apiResource('payment-methods', PaymentMethodController::class);
+
 
 
 });

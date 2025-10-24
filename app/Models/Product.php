@@ -9,6 +9,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use \App\Models\Companies;
 
 
 /**
@@ -25,7 +26,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * 
- * @property Company $company
+ * @property Companies $company
  * @property Department|null $department
  *
  * @package App\Models
@@ -52,10 +53,24 @@ class Product extends Model
 		'companies_id',
 		'department_id'
 	];
+	//Comprobamos si la empresa tieene seteado el campo de auto generar codigos del producto. 
+	protected static function booted()
+    {
+        static::creating(function ($product) {
+           $company = \App\Models\Companies::find($product->companies_id);
+
+
+            if ($company && $company->auto_code_products && empty($product->code)) {
+                $prefix = $company->product_code_prefix ?? 'PRD-';
+                $lastId = self::where('companies_id', $company->id)->max('id') + 1;
+                $product->code = $prefix . str_pad($lastId, 4, '0', STR_PAD_LEFT);
+            }
+        });
+    }
 
 	public function company()
 	{
-		return $this->belongsTo(Company::class);
+		return $this->belongsTo(Companies::class);
 	}
 
 	public function department()

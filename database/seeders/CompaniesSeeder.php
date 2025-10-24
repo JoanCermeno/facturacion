@@ -20,7 +20,12 @@ class CompaniesSeeder extends Seeder
                 "address" => "calle cualquiera",
                 "phone" => "04145057588",
                 "email" => "emporesa@email.com",
-                "invoice_sequence" => 1
+                "invoice_sequence" => 1,
+                'auto_code_products' => true,
+                'auto_code_departments' => true,
+                'product_code_prefix' => 'PROD-',
+                'department_code_prefix' => 'DEP-',
+                'logo_path' => null,
             ]
         );
     }

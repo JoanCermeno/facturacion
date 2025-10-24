@@ -10,16 +10,20 @@ class Companies extends Model
 {
     use HasFactory;
 
-    // Si tu tabla se llama 'companys' y no 'companies', debes especificarlo
     protected $table = 'companies';
 
     protected $fillable = [
         'name',
-        'address', // Asegúrate de añadir esta columna a tu tabla 'companys'
+        'address', 
         'phone',
         'email',
         'rif',
         'invoice_sequence',
+        'auto_code_products',
+        'auto_code_departments',
+        'product_code_prefix',
+        'department_code_prefix',
+        'logo_path',
     ];
 
     /**
