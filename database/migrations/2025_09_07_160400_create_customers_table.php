@@ -10,12 +10,17 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->string('id_card'); // Cédula o identificación
+              $table->foreignId('companies_id')
+          ->constrained('companies')
+          ->cascadeOnUpdate()
+          ->cascadeOnDelete();
+            $table->string('id_card')->nullable(); // Cédula o identificación
             $table->string('name');
             $table->string('email')->nullable();
-            $table->string('adres')->nullable(); // Dirección
+            $table->string('address')->nullable(); // Dirección
             $table->string('phone')->nullable();
             $table->timestamps();
+            
         });
     }
 

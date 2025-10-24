@@ -12,6 +12,7 @@ use Database\Seeders\CompaniesSeeder;
 use Database\Seeders\ProductsSeeder;
 //seeder para los métodos de pago
 use Database\Seeders\PaymentMethodSeeder;
+use Database\Seeders\CustomerSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -41,5 +42,7 @@ class DatabaseSeeder extends Seeder
         // precios de productos seeder
         $this->call(ProductPricesSeeder::class);
         $this->call(PaymentMethodSeeder::class);
+        $this->call(CustomerSeeder::class);
+
     }
 }

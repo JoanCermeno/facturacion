@@ -72,6 +72,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('inventory-operations', InventoryOperationController::class);
     Route::apiResource('payment-methods', PaymentMethodController::class);
 
-
+    // Rutas para la gestión de clientes
+    Route::apiResource('customers', CustomerController::class);
 
 });
