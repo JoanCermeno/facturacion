@@ -12,6 +12,7 @@ use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\InventoryOperationController;
 use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\CustomerController;
 
 // Rutas de Autenticación
 Route::prefix('auth')->group(function () {
@@ -47,7 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('companies', CompaniesController::class)->only(['show','update']);
     Route::get('/my-company', [CompaniesController::class, 'myCompany']);
     Route::put('/my-company', [CompaniesController::class, 'updateMyCompany']);
-    Route::post('/companies/{company}/logo', [CompaniesController::class, 'uploadLogo']);
+    Route::post('/companies/logo', [CompaniesController::class, 'uploadLogo']);
 
 
     Route::get('/sellers', [SellerController::class, 'index']);   // Listar vendedores

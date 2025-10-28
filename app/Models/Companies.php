@@ -24,6 +24,7 @@ class Companies extends Model
         'product_code_prefix',
         'department_code_prefix',
         'logo_path',
+        'profit_formula'
     ];
 
     /**

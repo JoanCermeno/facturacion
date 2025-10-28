@@ -35,7 +35,7 @@ class CompaniesController extends Controller
         $user = $request->user();
 
         $request->validate([
-            'name'             => 'required|string|max:255',
+            'name'             => 'nullable|string|max:255',
             'address'          => 'nullable|string|max:255',
             'phone'            => 'nullable|string|max:255',
             'rif'              => 'nullable|string|max:255',
@@ -45,11 +45,18 @@ class CompaniesController extends Controller
             'auto_code_departments' => 'nullable|boolean',
             'product_code_prefix' => 'nullable|string|max:255',
             'department_code_prefix' => 'nullable|string|max:255',
+            'profit_formula' => 'nullable|string|max:255',
+            'auto_code_products' => 'nullable|boolean',
+            'auto_code_departments' => 'nullable|boolean',
+            'product_code_prefix' => 'nullable|string|max:255',
+            'department_code_prefix' => 'nullable|string|max:255',
+            'logo_path' => 'nullable|string|max:255',
+
         ]);
 
         $company = Companies::updateOrCreate(
             ['id' => $user->companies_id],
-            $request->only(['name', 'address', 'phone', 'email', 'rif', 'invoice_sequence'])
+            $request->only(['name', 'address', 'phone', 'email', 'rif', 'invoice_sequence' , 'profit_formula', 'auto_code_products', 'auto_code_departments', 'product_code_prefix', 'department_code_prefix' , 'logo_path'])
         );
 
         if (!$user->companies_id) {
@@ -87,11 +94,16 @@ class CompaniesController extends Controller
             'rif'              => 'nullable|string|max:255',
             'email'            => ['nullable', 'email', Rule::unique('companys')->ignore($user->companies_id)],
             'invoice_sequence' => 'nullable|integer|min:1',
+            'profit_formula' => 'nullable|string|max:255',
+            'auto_code_products' => 'nullable|boolean',
+            'auto_code_departments' => 'nullable|boolean',
+            'product_code_prefix' => 'nullable|string|max:255',
+            'department_code_prefix' => 'nullable|string|max:255',
         ]);
 
         $company = Companies::updateOrCreate(
             ['id' => $user->companies_id],
-            $request->only(['name', 'address', 'phone', 'email', 'invoice_sequence'])
+            $request->only(['name', 'address', 'phone', 'email', 'invoice_sequence', 'profit_formula', 'auto_code_products', 'auto_code_departments', 'product_code_prefix', 'department_code_prefix'])
         );
 
         // Si el usuario aún no tiene compañía, la asociamos
@@ -113,17 +125,21 @@ class CompaniesController extends Controller
         $request->validate([
             'logo' => 'required|image|max:2048',
         ]);
+
         $user = $request->user();
         $companyId = $user->companies_id;
         $company = Companies::find($companyId);
-        $company->logo_path = $request->logo->store('public/logos');
+
+        // 🚨 CORRECCIÓN 1: Usar storePublicly para indicar el disk 'public' 🚨
+        // Esto guardará el archivo en storage/app/public/logos
+        $path = $request->logo->storePublicly('logos', 'public'); 
+       // $path = $file->store('logos', 'public');
+        // La ruta guardada será 'logos/nombre_archivo.png' (relativa a storage/app/public/)
+        $company->logo_path = $path; 
         $company->save();
 
-    
-        return response()->json([
-            'message' => 'Logo actualizado correctamente',
-       
-        ]);
+        // 🚨 CORRECCIÓN 2: Devolver la data de la empresa fresca (para el frontend) 🚨
+        return response()->json($company->fresh());
     }
 
 }
