@@ -34,6 +34,8 @@ class CustomerController extends Controller
             'address' => 'nullable|string|max:255',
         ]);
 
+      
+
         $validated['companies_id'] = $user->companies_id;
 
         $customer = Customer::create($validated);
