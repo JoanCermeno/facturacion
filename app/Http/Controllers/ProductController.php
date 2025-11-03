@@ -22,7 +22,7 @@ class ProductController extends Controller
         $perPage = $request->input('per_page', 15);
 
         $query = Product::where('companies_id', $user->companies_id)
-            ->with('department');
+            ->with(['department','currency']);
 
         // 🔍 Aplicar filtro si viene texto de búsqueda
         if ($search) {

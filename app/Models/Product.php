@@ -38,9 +38,10 @@ class Product extends Model
 	use HasFactory;
 
 	protected $casts = [
-		'cost_usd' => 'float',
+		'cost' => 'float',
 		'companies_id' => 'int',
-		'department_id' => 'int'
+		'department_id' => 'int',
+		'stock' => 'float'
 	];
 
 	protected $fillable = [
