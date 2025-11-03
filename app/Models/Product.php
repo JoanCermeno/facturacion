@@ -49,6 +49,7 @@ class Product extends Model
 		'name',
 		'description',
 		'cost',
+		'currency_id',
 		'base_unit',
 		'stock',
 		'companies_id',
