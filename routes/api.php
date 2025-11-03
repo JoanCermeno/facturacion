@@ -13,6 +13,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\InventoryOperationController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\UserController;
 
 // Rutas de Autenticación
 Route::prefix('auth')->group(function () {
@@ -26,12 +27,10 @@ Route::prefix('auth')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
 
     // Ruta para obtener los datos del usuario autenticado (tu propio perfil)
-    Route::get('/user', function (Request $request) {
-        return response()->json([
-            'message' => 'Información del usuario autenticado',
-            'user' => $request->user()
-        ]);
-    });
+
+
+    Route::apiResource('users', UserController::class);
+
 
     // Rutas para gestionar el perfil del usuario autenticado
     // Se recomienda usar un único recurso para el perfil del usuario,
@@ -54,6 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/sellers', [SellerController::class, 'index']);   // Listar vendedores
     Route::post('/sellers', [SellerController::class, 'store']); // Crear vendedor
     Route::delete('/sellers/{seller}', [SellerController::class, 'destroy']); // Borrar vendedor
+    Route::put('/sellers/{seller}', [SellerController::class, 'update']); // Editar vendedor
     
     // Rutas para la gestión de los cajeros
     Route::get('/cashiers', [CashierController::class, 'index']);

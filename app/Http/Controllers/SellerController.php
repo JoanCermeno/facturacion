@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Seller;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;// nesesario para la ediccion de vendedores
 
 class SellerController extends Controller
 {
@@ -55,7 +56,7 @@ class SellerController extends Controller
         return response()->json($sellers);
     }
     // eliminar vendedor
-   public function destroy(Seller $seller)
+    public function destroy(Seller $seller)
     {
         $seller->delete();
 
@@ -63,4 +64,41 @@ class SellerController extends Controller
             'message' => 'Vendedor eliminado correctamente 🗑️'
         ], 200);
     }
+    // Actualizar vendedor
+    public function update(Request $request, Seller $seller)
+    {
+        $user = $request->user();
+
+        // Debe tener empresa
+        if (!$user->companies_id) {
+            return response()->json(['message' => 'No tienes empresa asociada.'], 403);
+        }
+
+        // Solo admin puede editar
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Solo los administradores pueden editar vendedores.'], 403);
+        }
+
+        // Validación (importante agregar ignore)
+        $data = $request->validate([
+            'ci'         => [
+                'required',
+                'string',
+                'max:12',
+                Rule::unique('sellers', 'ci')->ignore($seller->id)
+            ],
+            'name'       => 'required|string|max:255',
+            'phone'      => 'nullable|string|max:20',
+            'commission' => 'required|numeric|min:0|max:100',
+        ]);
+
+        // Actualizar
+        $seller->update($data);
+
+        return response()->json([
+            'message' => 'Vendedor actualizado correctamente ✅',
+            'seller'  => $seller
+        ], 200);
+    }
+
 }
