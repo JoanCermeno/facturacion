@@ -66,8 +66,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/departments/{id}', [DepartmentController::class, 'update']); // Editar departamento
     Route::delete('/departments/{id}', [DepartmentController::class, 'destroy']); // Borrar departamento
     //* estas rutas de aqui abajo fueron creadas con el flag --api, lo cual nos deja todo el crud muy simplifacod
+    Route::get('/currencies/conversions', [CurrencyController::class, 'conversionTable']);
 
     Route::apiResource('currencies', CurrencyController::class);
+
     //productos routes
     Route::apiResource('products', ProductController::class);
     Route::apiResource('inventory-operations', InventoryOperationController::class);

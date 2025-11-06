@@ -11,10 +11,13 @@ class CurrencyController extends Controller
     {
         $currencies = Currency::where('companies_id', auth()->user()->companies_id)->get();
 
-        return response()->json([
-            'message' => 'Monedas obtenidas correctamente ✅',
-            'currencies' => $currencies
-        ], 200);
+        return response()->json(
+            [
+                'message' => 'Monedas obtenidas correctamente ✅',
+                'currencies' => $currencies,
+            ],
+            200,
+        );
     }
 
     public function store(Request $request)
@@ -30,10 +33,26 @@ class CurrencyController extends Controller
 
         $currency = Currency::create($validated);
 
-        return response()->json([
-            'message' => 'Moneda creada correctamente ✅',
-            'currency' => $currency
-        ], 201);
+        return response()->json(
+            [
+                'message' => 'Moneda creada correctamente ✅',
+                'currency' => $currency,
+            ],
+            201,
+        );
+    }
+
+    public function show(Request $request, $id)
+    {
+        $currency = Currency::findOrFail($id);
+
+        return response()->json(
+            [
+                'message' => 'Moneda obtenida correctamente ✅',
+                'currency' => $currency,
+            ],
+            200,
+        );
     }
 
     public function update(Request $request, $id)
@@ -47,60 +66,131 @@ class CurrencyController extends Controller
             'is_base' => 'sometimes|boolean',
         ]);
 
-        // ⚠️ Validar unicidad del símbolo dentro de la misma empresa (ignorando el actual)
+        $companiesId = auth()->user()->companies_id;
+
+        // ✅ Unicidad del símbolo dentro de la empresa
         if (isset($validated['symbol'])) {
-            $exists = Currency::where('companies_id', auth()->user()->companies_id)
-                ->where('symbol', $validated['symbol'])
-                ->where('id', '!=', $currency->id)
-                ->exists();
+            $exists = Currency::where('companies_id', $companiesId)->where('symbol', $validated['symbol'])->where('id', '!=', $currency->id)->exists();
 
             if ($exists) {
-                return response()->json([
-                    'message' => 'Ya existe otra moneda con este símbolo en tu empresa.'
-                ], 422);
+                return response()->json(
+                    [
+                        'message' => 'Ya existe otra moneda con este símbolo en tu empresa.',
+                    ],
+                    422,
+                );
             }
         }
 
-        // 🧩 Si el usuario intenta desmarcar la moneda base actual
+        // ✅ No permitir dejar sin moneda base
         if ($currency->is_base && isset($validated['is_base']) && $validated['is_base'] == false) {
-            $existsAnotherBase = Currency::where('id', '!=', $currency->id)
-                ->where('is_base', true)
-                ->exists();
+            $existsAnother = Currency::where('companies_id', $companiesId)->where('id', '!=', $currency->id)->where('is_base', true)->exists();
 
-            if (!$existsAnotherBase) {
-                return response()->json([
-                    'message' => 'Debe existir al menos una moneda base. No puedes dejar todas en falso.'
-                ], 422);
+            if (!$existsAnother) {
+                return response()->json(
+                    [
+                        'message' => 'Debes tener al menos una moneda base.',
+                    ],
+                    422,
+                );
             }
         }
 
-        // 🧩 Si se marca una nueva como base, desmarcar las demás
+        // ✅ Si se marca esta como base
         if (isset($validated['is_base']) && $validated['is_base'] == true) {
-            Currency::where('id', '!=', $currency->id)->update(['is_base' => false]);
+            // Desmarcar las demás monedas
+            Currency::where('companies_id', $companiesId)
+                ->where('id', '!=', $currency->id)
+                ->update(['is_base' => false]);
+
+            // ✅ La moneda base SIEMPRE debe tener exchange_rate = 1
+            $validated['exchange_rate'] = 1;
         }
 
+        // ✅ Actualizar la moneda actual
         $currency->update($validated);
+
+        // ✅ Reconfirmar que la moneda base actual tenga rate = 1, por seguridad
+        $base = Currency::where('companies_id', $companiesId)->where('is_base', true)->first();
+
+        if ($base) {
+            if ($base->exchange_rate != 1) {
+                $base->exchange_rate = 1;
+                $base->save();
+            }
+        }
 
         return response()->json([
             'message' => 'Moneda actualizada correctamente ✅',
-            'currency' => $currency
+            'currency' => $currency,
         ]);
     }
-
     public function destroy($id)
     {
         $currency = Currency::findOrFail($id);
 
         if ($currency->is_base) {
-            return response()->json([
-                'message' => 'No puedes eliminar la moneda base del sistema.'
-            ], 422);
+            return response()->json(
+                [
+                    'message' => 'No puedes eliminar la moneda base del sistema.',
+                ],
+                422,
+            );
         }
 
         $currency->delete();
 
         return response()->json([
-            'message' => 'Moneda eliminada correctamente 🗑️'
+            'message' => 'Moneda eliminada correctamente 🗑️',
         ]);
     }
+    public function conversionTable()
+    {
+        $companyId = auth()->user()->companies_id;
+
+        // ✅ Obtener la moneda base
+        $base = Currency::where('companies_id', $companyId)
+            ->where('is_base', true)
+            ->first();
+
+        if (!$base) {
+            return response()->json([
+                'message' => 'No hay moneda base definida.'
+            ], 422);
+        }
+
+        // ✅ Obtener las demás monedas
+        $currencies = Currency::where('companies_id', $companyId)
+            ->where('id', '!=', $base->id)
+            ->get();
+
+        // ✅ Construir la tabla de conversión
+        $result = [];
+
+        foreach ($currencies as $currency) {
+
+            // ✅ Convertir *1 unidad base* → moneda objetivo
+            $converted = $currency->convertFromBase(1);
+
+            $result[] = [
+                'symbol' => $currency->symbol,
+                'name' => $currency->name,
+                'conversion_type' => $currency->conversion_type,
+                'exchange_rate' => $currency->exchange_rate,
+                'equivalent_to_base' => $converted,
+                'formatted' => "1 {$base->symbol} = {$converted} {$currency->symbol}"
+            ];
+        }
+
+        return response()->json([
+            'message' => 'Tabla de conversiones generada correctamente ✅',
+            'base_currency' => [
+                'symbol' => $base->symbol,
+                'name' => $base->name,
+                'exchange_rate' => 1
+            ],
+            'conversions' => $result
+        ]);
+    }
+
 }

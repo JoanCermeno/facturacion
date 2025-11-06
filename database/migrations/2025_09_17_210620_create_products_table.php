@@ -9,7 +9,7 @@ return new class extends Migration {
     {
        Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('companies_id')->constrained()->onDelete('cascade');
+            $table->foreignId('companies_id')->constrained()->onDelete('restrict');
             $table->foreignId('department_id')->constrained()->onDelete('restrict');
             $table->string('code');
             $table->unique(['companies_id', 'code']); // Unicidad por empresa

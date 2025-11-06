@@ -17,6 +17,7 @@ return new class extends Migration
         $table->string('name', 50);  // Ej: Dólar, Bolívar, Peso Colombiano
         $table->decimal('exchange_rate', 15, 6); // Tasa (cuánto vale 1 USD en esa moneda)
         $table->boolean('is_base')->default(false); // Solo una moneda base por empresa
+        $table->enum('conversion_type', ['multiply', 'divide'])->default('multiply');
         $table->timestamps();
 
         $table->unique(['companies_id', 'symbol']); // Cada empresa no puede repetir el mismo símbolo

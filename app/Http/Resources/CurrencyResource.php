@@ -21,6 +21,7 @@ class CurrencyResource extends JsonResource
             'exchange_rate' => $this->exchange_rate,
             'is_base' => $this->is_base,
             'companies_id' => $this->companies_id,  
+            
         ];    
     }
 }
