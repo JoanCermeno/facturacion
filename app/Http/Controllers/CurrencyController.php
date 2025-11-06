@@ -4,9 +4,56 @@ namespace App\Http\Controllers;
 
 use App\Models\Currency;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CurrencyController extends Controller
 {
+    public function updateExchangeRate(Request $request, $id)
+    {
+        $currency = Currency::findOrFail($id);
+
+        $validated = $request->validate([
+            'exchange_rate' => 'required|numeric|min:0.000001',
+        ]);
+
+        // ✅ No permitir cambiar la moneda base aquí
+        if ($currency->is_base) {
+            return response()->json([
+                'message' => 'La tasa de la moneda base no se puede modificar.',
+            ], 422);
+        }
+
+        $currency->exchange_rate = $validated['exchange_rate'];
+        $currency->save();
+
+        return response()->json([
+            'message' => 'Tasa de cambio actualizada correctamente ✅',
+            'currency' => $currency,
+        ]);
+    }
+
+    public function setBaseCurrency(Request $request, $id) {
+        DB::transaction(function () use ($id) 
+        {
+
+            // poner todas las monedas como no base
+            Currency::query()->update([
+                'is_base' => false,
+                'exchange_rate' => 0,
+            ]);
+
+            // asignar nueva base
+            $currency = Currency::findOrFail($id);
+            $currency->is_base = true;
+            $currency->exchange_rate = 1;
+            $currency->save();
+        });
+
+        return response()->json([
+            'message' => 'Moneda base actualizada correctamente'
+        ], 200);
+    }
+
     public function index()
     {
         $currencies = Currency::where('companies_id', auth()->user()->companies_id)->get();
@@ -27,6 +74,7 @@ class CurrencyController extends Controller
             'symbol' => 'required|string|max:5',
             'exchange_rate' => 'required|numeric|min:0',
             'is_base' => 'boolean',
+            'conversion_type' => 'required|in:multiply,divide',
         ]);
 
         $validated['companies_id'] = auth()->user()->companies_id;
@@ -61,9 +109,11 @@ class CurrencyController extends Controller
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:100',
-            'symbol' => 'sometimes|string|max:10',
+            'symbol' => 'sometimes|string|max:4',
             'exchange_rate' => 'sometimes|numeric|min:0',
             'is_base' => 'sometimes|boolean',
+            'conversion_type' => 'required|in:multiply,divide',
+
         ]);
 
         $companiesId = auth()->user()->companies_id;
@@ -192,5 +242,7 @@ class CurrencyController extends Controller
             'conversions' => $result
         ]);
     }
+
+ 
 
 }

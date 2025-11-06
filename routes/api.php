@@ -15,6 +15,7 @@ use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UserController;
 
+
 // Rutas de Autenticación
 Route::prefix('auth')->group(function () {
     Route::post('/register',[AuthController::class, 'register']);
@@ -67,7 +68,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/departments/{id}', [DepartmentController::class, 'destroy']); // Borrar departamento
     //* estas rutas de aqui abajo fueron creadas con el flag --api, lo cual nos deja todo el crud muy simplifacod
     Route::get('/currencies/conversions', [CurrencyController::class, 'conversionTable']);
-
+    Route::patch('/currencies/{currency}/rate', [CurrencyController::class, 'updateExchangeRate']);
+    Route::patch('/currencies/{id}/set-base', [CurrencyController::class, 'setBaseCurrency']);
     Route::apiResource('currencies', CurrencyController::class);
 
     //productos routes
