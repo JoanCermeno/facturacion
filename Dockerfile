@@ -18,7 +18,7 @@ WORKDIR /var/www/html
 COPY . .
 
 # Instalar dependencias de Laravel
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --optimize-autoloader
 
 # -------------------------------
 # STAGE 2 – Imagen final con PHP + NGINX
