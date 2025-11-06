@@ -45,6 +45,8 @@ test('un admin puede crear una moneda', function () {
         'symbol' => 'VES',
         'exchange_rate' => 36.5,
         'is_base' => false,
+        'companies_id' => $Companies->id,
+        'conversion_type' => 'multiply',
     ]);
 
     $response->assertStatus(201)
@@ -71,6 +73,8 @@ test('un admin puede actualizar una moneda', function () {
         'name' => 'Peso Colombiano',
         'symbol' => 'COP',
         'exchange_rate' => 4000,
+        'is_base' => false,
+        'conversion_type' => 'multiply',
     ]);
 
     $response = $this->putJson("/api/currencies/{$currency->id}", [
@@ -78,6 +82,8 @@ test('un admin puede actualizar una moneda', function () {
         'symbol' => 'COP',
         'exchange_rate' => 4200,
         'is_base' => false,
+        'companies_id' => $Companies->id,
+        'conversion_type' => 'multiply',
     ]);
 
     $response->assertStatus(200)
