@@ -1,33 +1,31 @@
 # -------------------------------
-# STAGE 1 – PHP Dependencies
+# STAGE 1 – PHP Dependencies (Builder)
 # -------------------------------
 FROM php:8.2-fpm AS php-builder
 
-# Dependencias del sistema
+# Dependencias necesarias para Laravel
 RUN apt-get update && apt-get install -y \
-    git zip unzip curl libpq-dev libzip-dev libonig-dev libxml2-dev \
-    && docker-php-ext-install pdo pdo_mysql zip
+    git zip unzip curl libzip-dev libicu-dev libxml2-dev libonig-dev \
+    && docker-php-ext-install pdo pdo_mysql zip intl mbstring
 
 # Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Crear directorio
 WORKDIR /var/www/html
 
-# Copiar archivos
+# Copiar archivos del proyecto
 COPY . .
 
 # Instalar dependencias de Laravel
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # -------------------------------
-# STAGE 2 – Imagen final con PHP + NGINX
+# STAGE 2 – PHP-FPM + NGINX
 # -------------------------------
 FROM php:8.2-fpm
 
-# Instalar Nginx y utilidades
-RUN apt-get update && apt-get install -y nginx supervisor \
-    && docker-php-ext-install pdo pdo_mysql
+# Instalar Nginx
+RUN apt-get update && apt-get install -y nginx
 
 # Copiar código desde el builder
 COPY --from=php-builder /var/www/html /var/www/html
@@ -37,15 +35,13 @@ WORKDIR /var/www/html
 # Copiar configuración de Nginx
 COPY ./docker/nginx.conf /etc/nginx/nginx.conf
 
-# Copiar configuración de Supervisor
-COPY ./docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Copiar script de arranque
+# Copiar y preparar entrypoint
 COPY ./docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Establecer permisos
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Permisos para Laravel
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
 EXPOSE 80
 

@@ -3,6 +3,8 @@
 echo "Esperando que la base de datos esté lista..."
 sleep 5
 
+php artisan key:generate --force
+
 echo "Ejecutando migraciones..."
 php artisan migrate --force
 
