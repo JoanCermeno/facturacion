@@ -6,7 +6,8 @@ FROM php:8.2-fpm AS php-builder
 # Dependencias necesarias para Laravel
 RUN apt-get update && apt-get install -y \
     git zip unzip curl libzip-dev libicu-dev libxml2-dev libonig-dev \
-    && docker-php-ext-install pdo pdo_mysql zip intl mbstring
+    && docker-php-ext-install pdo pdo_mysql zip intl mbstring php-mysql
+
 
 # Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -17,7 +18,7 @@ WORKDIR /var/www/html
 COPY . .
 
 # Instalar dependencias de Laravel
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer install --optimize-autoloader --no-interaction
 
 # -------------------------------
 # STAGE 2 – PHP-FPM + NGINX
