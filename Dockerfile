@@ -1,16 +1,16 @@
 # -------------------------------
-# STAGE 1 – PHP Dependencies (Builder)
+# STAGE 1 – Builder con Debian
 # -------------------------------
-FROM php:8.2-fpm AS php-builder
+FROM debian:bullseye AS php-builder
 
-# Dependencias necesarias para Laravel
+# Instalar PHP y extensiones necesarias
 RUN apt-get update && apt-get install -y \
-    git zip unzip curl libzip-dev libicu-dev libxml2-dev libonig-dev \
-    && docker-php-ext-install pdo pdo_mysql zip intl mbstring php-mysql
-
+    php php-fpm php-mysql php-zip php-intl php-mbstring php-curl php-xml php-bcmath php-cli php-common php-gd php-readline \
+    git zip unzip curl libzip-dev libicu-dev libonig-dev libxml2-dev libpng-dev libjpeg-dev libwebp-dev libfreetype6-dev \
+    nginx
 
 # Instalar Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 WORKDIR /var/www/html
 
@@ -18,20 +18,22 @@ WORKDIR /var/www/html
 COPY . .
 
 # Instalar dependencias de Laravel
-RUN composer install --optimize-autoloader --no-interaction
+RUN composer install --optimize-autoloader --no-interaction --no-dev
 
 # -------------------------------
-# STAGE 2 – PHP-FPM + NGINX
+# STAGE 2 – Producción con Nginx
 # -------------------------------
-FROM php:8.2-fpm
+FROM debian:bullseye
 
-# Instalar Nginx
-RUN apt-get update && apt-get install -y nginx
+# Instalar PHP y Nginx en producción
+RUN apt-get update && apt-get install -y \
+    php php-fpm php-mysql php-zip php-intl php-mbstring php-curl php-xml php-bcmath php-cli php-common php-gd php-readline \
+    nginx
+
+WORKDIR /var/www/html
 
 # Copiar código desde el builder
 COPY --from=php-builder /var/www/html /var/www/html
-
-WORKDIR /var/www/html
 
 # Copiar configuración de Nginx
 COPY ./docker/nginx.conf /etc/nginx/nginx.conf
