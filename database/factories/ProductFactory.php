@@ -21,6 +21,7 @@ class ProductFactory extends Factory
             'name' => $this->faker->word(),
             'description' => $this->faker->word(),
             'cost' => $this->faker->randomFloat(2, 0, 100),
+            'is_decimal' => $this->faker->boolean(),
             'base_unit' => $this->faker->randomElement(['unit', 'service','box','pack','pair','dozen','kg','gr','lb','oz','lt','ml','gal','m','cm','mm','inch','sqm','sqft','hour','day','service']),
             
         ];

@@ -50,10 +50,11 @@ class Product extends Model
 		'description',
 		'cost',
 		'currency_id',
+		'is_decimal',
 		'base_unit',
 		'stock',
 		'companies_id',
-		'department_id'
+		'department_id',
 	];
 	//Comprobamos si la empresa tieene seteado el campo de auto generar codigos del producto. 
 	protected static function booted()
@@ -92,6 +93,17 @@ class Product extends Model
 	public function currency()
 	{
 		return $this->belongsTo(Currency::class);
+	}
+
+	//relaciones con las operaciones de inventario
+	public function inventoryDetails()
+	{
+		return $this->hasMany(InventoryOperationDetail::class, 'product_id');
+	}
+
+	public function hasInventoryOperations()
+	{
+		return $this->inventoryDetails()->exists();
 	}
 
 }

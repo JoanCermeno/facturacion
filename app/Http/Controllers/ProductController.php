@@ -52,6 +52,7 @@ class ProductController extends Controller
             'department_id' => 'required|integer|exists:departments,id',
             'description' => 'nullable|string',
             'cost' => 'required|numeric',
+            'is_decimal' => 'required|boolean',
             'base_unit' => 'required|in:unit,box,pack,pair,dozen,kg,gr,lb,oz,lt,ml,gal,m,cm,mm,inch,sqm,sqft,hour,day,service',
             'currency_id' => 'required|exists:currencies,id',
         ];
@@ -101,8 +102,10 @@ class ProductController extends Controller
             'department_id' => 'sometimes|integer|exists:departments,id',
             'description' => 'nullable|string',
             'cost' => 'sometimes|numeric',
+            'is_decimal' => 'sometimes|boolean',
             'base_unit' => 'sometimes|in:unit,box,pack,pair,dozen,kg,gr,lb,oz,lt,ml,gal,m,cm,mm,inch,sqm,sqft,hour,day,service',
             'currency_id' => 'sometimes|exists:currencies,id',
+
         ];
 
         if (!$company->auto_code_products) {
@@ -121,12 +124,22 @@ class ProductController extends Controller
     }
 
     // 🔹 Eliminar un producto
-    public function destroy(Product $product)
+    public function destroy($id)
     {
+        $product = Product::findOrFail($id);
+
+        // Verificar si tiene operaciones de inventario asociadas
+        if ($product->hasInventoryOperations()) {
+            return response()->json([
+                'message' => 'No se puede eliminar este producto porque está asociado a operaciones de inventario.'
+            ], 422);
+        }
+
         $product->delete();
 
         return response()->json([
             'message' => 'Producto eliminado correctamente 🗑️'
-        ], 200);
+        ]);
     }
+
 }

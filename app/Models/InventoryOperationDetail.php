@@ -17,7 +17,7 @@ class InventoryOperationDetail extends Model
 
     public function operation()
     {
-        return $this->belongsTo(InventoryOperation::class, 'inventory_operation_id');
+        return $this->belongsTo(InventoryOperation::class, 'operation_id');
     }
 
     public function product()
