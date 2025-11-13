@@ -22,6 +22,7 @@ test('un admin puede crear un seller', function () {
         'name' => 'Pedro Pérez',
         'phone' => '0414-1234567',
         'commission' => 7.5,
+        'commission_type' => 'utility',
     ]);
 
     // Comprobaciones
@@ -32,6 +33,9 @@ test('un admin puede crear un seller', function () {
                      'ci' => '12345678',
                      'name' => 'Pedro Pérez',
                      'companies_id' => $company->id,
+                     'phone' => '0414-1234567',
+                     'commission' => 7.5,
+                     'commission_type' => 'utility',
                  ]
              ]);
 

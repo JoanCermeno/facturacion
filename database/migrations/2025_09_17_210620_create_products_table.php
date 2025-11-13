@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->string('code');
             $table->unique(['companies_id', 'code']); // Unicidad por empresa
             $table->string('name');
+            $table->string('reference')->nullable();
             $table->text('description')->nullable();
             $table->decimal('cost', 12, 2)->default(0);
             $table->enum('base_unit', [

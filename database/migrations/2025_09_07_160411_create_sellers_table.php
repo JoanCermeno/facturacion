@@ -15,6 +15,8 @@ return new class extends Migration
             $table->string('phone')->nullable()->comment('Teléfono del vendedor');          // Teléfono
             $table->decimal('commission', 5, 2)->default(0)->comment('porcentaje de comisión');
             $table->foreignId('companies_id')->constrained('companies')->cascadeOnUpdate()->restrictOnDelete();
+            //un enun por comision de venta o por comision de utilidad
+            $table->enum('commission_type', ['sale', 'utility'])->default('sale');
         });
     }
 

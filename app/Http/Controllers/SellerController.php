@@ -28,6 +28,7 @@ class SellerController extends Controller
             'name'       => 'required|string|max:255',
             'phone'      => 'nullable|string|max:20',
             'commission' => 'required|numeric|min:0|max:100',
+            'commission_type' => 'required|in:sale,utility'
         ]);
 
         // Asociar vendedor a la empresa del admin    
@@ -50,8 +51,21 @@ class SellerController extends Controller
         if (!$user->companies_id) {
             return response()->json(['message' => 'No tienes empresa asociada.'], 403);
         }
+        // parametros de busqueda
+        $search = $request->input('search');
+        $perPage = $request->input('per_page', 15);
 
-        $sellers = Seller::where('companies_id', $user->companies_id)->get();
+        $query = Seller::where('companies_id', $user->companies_id);
+
+        if($search){
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('ci', 'like', "%{$search}%");
+            });
+        }
+
+        $sellers = $query->paginate($perPage);
+
 
         return response()->json($sellers);
     }

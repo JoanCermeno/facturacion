@@ -37,7 +37,8 @@ class Seller extends Model
 		'ci',
 		'phone',
 		'commission',
-		'companies_id'
+		'companies_id',
+		'commission_type' // sale o utility
 	];
 
 	public function company()
