@@ -31,7 +31,7 @@ class UserController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
-            'role'     => ['required', Rule::in(['cashier'])],
+            'role'     => ['required', Rule::in(['cashier','admin'])],
             'phone'    => 'nullable|string|max:20',
         ]);
 
@@ -73,7 +73,7 @@ class UserController extends Controller
                 'email',
                 Rule::unique('users','email')->ignore($user->id)
             ],
-            'role'  => ['required', Rule::in(['cashier'])],
+            'role'  => ['required', Rule::in(['cashier', 'admin'])],
             'phone' => 'nullable|string|max:20',
         ]);
 
