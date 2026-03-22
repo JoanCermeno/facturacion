@@ -29,7 +29,7 @@ class ProductImportService
             $department = Department::create([
                 'companies_id' => $companies_id,
                 'description' => 'Carga Masiva',
-                'code' => null, // Se autogenerará si está configurado
+                'code' => 'CARGA-MASIVA-' . $companies_id,
             ]);
         }
 
