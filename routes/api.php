@@ -10,6 +10,7 @@ use App\Http\Controllers\CashierController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductImportController;
 use App\Http\Controllers\InventoryOperationController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\CustomerController;
@@ -74,6 +75,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //productos routes
     Route::apiResource('products', ProductController::class);
+    Route::post('/products/import', [ProductImportController::class, 'import']);
     Route::apiResource('inventory-operations', InventoryOperationController::class);
     Route::apiResource('payment-methods', PaymentMethodController::class);
 

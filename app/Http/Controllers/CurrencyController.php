@@ -56,7 +56,9 @@ class CurrencyController extends Controller
 
     public function index()
     {
-        $currencies = Currency::where('companies_id', auth()->user()->companies_id)->get();
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $currencies = Currency::where('companies_id', $user->companies_id)->get();
 
         return response()->json(
             [
@@ -77,7 +79,9 @@ class CurrencyController extends Controller
             'conversion_type' => 'required|in:multiply,divide',
         ]);
 
-        $validated['companies_id'] = auth()->user()->companies_id;
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $validated['companies_id'] = $user->companies_id;
 
         $currency = Currency::create($validated);
 
@@ -116,7 +120,9 @@ class CurrencyController extends Controller
 
         ]);
 
-        $companiesId = auth()->user()->companies_id;
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $companiesId = $user->companies_id;
 
         // ✅ Unicidad del símbolo dentro de la empresa
         if (isset($validated['symbol'])) {
@@ -196,7 +202,9 @@ class CurrencyController extends Controller
     }
     public function conversionTable()
     {
-        $companyId = auth()->user()->companies_id;
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $companyId = $user->companies_id;
 
         // ✅ Obtener la moneda base
         $base = Currency::where('companies_id', $companyId)

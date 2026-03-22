@@ -20,7 +20,9 @@ class PaymentMethodController extends Controller
 
     public function store(Request $request)
     {
-        $companyId = auth()->user()->companies_id;
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $companyId = $user->companies_id;
 
         $validated = $request->validate([
             'code' => 'required|string|max:50',
@@ -47,7 +49,9 @@ class PaymentMethodController extends Controller
 
     public function show($id)
     {
-        $companyId = auth()->user()->companies_id;
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $companyId = $user->companies_id;
 
         $method = PaymentMethod::where('companies_id', $companyId)
             ->with('currency')
@@ -58,7 +62,9 @@ class PaymentMethodController extends Controller
 
     public function update(Request $request, $id)
     {
-        $companyId = auth()->user()->companies_id;
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $companyId = $user->companies_id;
 
         $paymentMethod = PaymentMethod::where('companies_id', $companyId)
             ->findOrFail($id);
@@ -88,7 +94,9 @@ class PaymentMethodController extends Controller
 
     public function destroy($id)
     {
-        $companyId = auth()->user()->companies_id;
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $companyId = $user->companies_id;
 
         $paymentMethod = PaymentMethod::where('companies_id', $companyId)
             ->findOrFail($id);
