@@ -31,7 +31,7 @@ class User extends Authenticatable
 
     public function company()
     {
-        return $this->belongsTo(Company::class, 'companies_id');
+        return $this->belongsTo(Companies::class, 'companies_id');
     }
 
 

@@ -15,6 +15,8 @@ use App\Http\Controllers\InventoryOperationController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CashRegisterController;
+use App\Http\Controllers\SaleController;
 
 
 // Rutas de Autenticación
@@ -81,5 +83,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Rutas para la gestión de clientes
     Route::apiResource('customers', CustomerController::class);
+
+    // ──────────────────────────────────────────────────────
+    // MÓDULO POS: Caja Registradora y Ventas
+    // ──────────────────────────────────────────────────────
+
+    // Cash Registers (Apertura y Cierre de Caja)
+    Route::get('/cash-registers/current', [CashRegisterController::class, 'current']);
+    Route::post('/cash-registers', [CashRegisterController::class, 'store']);
+    Route::post('/cash-registers/{id}/close', [CashRegisterController::class, 'close']);
+    Route::get('/cash-registers', [CashRegisterController::class, 'history']);
+
+    // Sales (Ventas / Facturación)
+    Route::apiResource('sales', SaleController::class)->only(['index', 'store', 'show']);
 
 });
