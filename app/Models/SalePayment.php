@@ -17,6 +17,7 @@ class SalePayment extends Model
         'amount',
         'currency_id',
         'amount_in_base',
+        'is_change',
     ];
 
     protected $casts = [

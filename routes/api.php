@@ -17,6 +17,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CashRegisterController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\PricingController;
 
 
 // Rutas de Autenticación
@@ -96,5 +97,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Sales (Ventas / Facturación)
     Route::apiResource('sales', SaleController::class)->only(['index', 'store', 'show']);
+
+    // Módulo de Precios
+    Route::get('/pricing', [PricingController::class, 'index']);
+    Route::put('/pricing/update', [PricingController::class, 'update']);
+    Route::get('/pricing/history', [PricingController::class, 'history']);
 
 });

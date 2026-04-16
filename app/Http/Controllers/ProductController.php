@@ -55,25 +55,63 @@ class ProductController extends Controller
             'is_decimal' => 'required|boolean',
             'base_unit' => 'required|in:unit,box,pack,pair,dozen,kg,gr,lb,oz,lt,ml,gal,m,cm,mm,inch,sqm,sqft,hour,day,service',
             'currency_id' => 'required|exists:currencies,id',
+            'reference' => 'nullable|string',
+            'price_usd' => 'nullable|numeric|min:0',
+            'profit_percentage' => 'nullable|numeric',
         ];
 
         if (!$company->auto_code_products) {
-            //Definimos las reglas de validación en caso de que sea falso, es decir se debe poner el code de producto
             $rules['code'] = 'required|string|unique:products,code';
         }
 
-        // 🔹 Validamos si la empresa tiene seteado el campo de auto generar codigos del producto.
         $validated = $request->validate($rules);
-
-        // 🔹 Vincular automáticamente con la empresa del usuario
         $validated['companies_id'] = $user->companies_id;
 
-        $product = Product::create($validated);
+        return \Illuminate\Support\Facades\DB::transaction(function() use ($validated, $user) {
+            $product = Product::create($validated);
 
-        return response()->json([
-            'message' => 'Producto registrado correctamente ✅',
-            'product' => $product
-        ], 201);
+            // 1. Crear la Unidad Base
+            $unit = \App\Models\ProductUnit::create([
+                'product_id' => $product->id,
+                'unit_type' => $validated['base_unit'],
+                'conversion_factor' => 1,
+            ]);
+
+            // 2. Crear los Precios (Contado, Mayor, Crédito)
+            // Si el usuario envió un precio/margen específico, lo usamos para el Precio al Contado (ID 1)
+            $defaultProfit = $validated['profit_percentage'] ?? 30; // 30% por defecto solicitado por el usuario
+            $retailPrice = $validated['price_usd'] ?? ($validated['cost'] * (1 + $defaultProfit / 100));
+
+            $priceTypes = [
+                ['id' => 1, 'profit' => $defaultProfit, 'price' => $retailPrice],
+                ['id' => 2, 'profit' => 15, 'price' => $validated['cost'] * 1.15],
+                ['id' => 3, 'profit' => 50, 'price' => $validated['cost'] * 1.50],
+            ];
+
+            foreach ($priceTypes as $pt) {
+                $price = \App\Models\ProductPrice::create([
+                    'product_unit_id' => $unit->id,
+                    'price_type_id' => $pt['id'],
+                    'price_usd' => $pt['price'],
+                    'profit_percentage' => $pt['profit'],
+                ]);
+
+                \App\Models\PriceHistory::create([
+                    'product_price_id' => $price->id,
+                    'user_id' => $user->id,
+                    'old_price' => 0,
+                    'new_price' => $price->price_usd,
+                    'old_profit_percentage' => 0,
+                    'new_profit_percentage' => $price->profit_percentage,
+                    'change_reason' => 'Precio inicial al crear producto',
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Producto registrado con unidades y precios base ✅',
+                'product' => $product->load('units.prices')
+            ], 201);
+        });
     }
 
     // 🔹 Mostrar un producto en detalle (con unidades y precios)
@@ -105,7 +143,7 @@ class ProductController extends Controller
             'is_decimal' => 'sometimes|boolean',
             'base_unit' => 'sometimes|in:unit,box,pack,pair,dozen,kg,gr,lb,oz,lt,ml,gal,m,cm,mm,inch,sqm,sqft,hour,day,service',
             'currency_id' => 'sometimes|exists:currencies,id',
-
+            'reference' => 'nullable|string',
         ];
 
         if (!$company->auto_code_products) {

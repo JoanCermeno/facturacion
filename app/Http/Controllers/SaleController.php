@@ -103,6 +103,9 @@ class SaleController extends Controller
             'payments' => 'required|array|min:1',
             'payments.*.payment_method_id' => 'required|exists:payment_methods,id',
             'payments.*.amount' => 'required|numeric|min:0.01',
+            'change_payments' => 'nullable|array',
+            'change_payments.*.payment_method_id' => 'required_with:change_payments|exists:payment_methods,id',
+            'change_payments.*.amount' => 'required_with:change_payments|numeric|min:0.01',
         ]);
 
         // Verificar que la caja esté abierta y pertenezca al usuario
@@ -178,7 +181,29 @@ class SaleController extends Controller
                     'amount' => $paymentData['amount'],
                     'currency_id' => $currency->id,
                     'amount_in_base' => $amountInBase,
+                    'is_change' => false,
                 ]);
+            }
+
+            // ── 5.1 Registrar pagos de vuelto / cambio ────────
+            if (!empty($data['change_payments'])) {
+                foreach ($data['change_payments'] as $changeData) {
+                    $paymentMethod = \App\Models\PaymentMethod::with('currency')->findOrFail($changeData['payment_method_id']);
+                    $currency = $paymentMethod->currency;
+
+                    $amountInBase = $currency->is_base
+                        ? $changeData['amount']
+                        : $currency->convertToBase($changeData['amount']);
+
+                    SalePayment::create([
+                        'sale_id' => $sale->id,
+                        'payment_method_id' => $changeData['payment_method_id'],
+                        'amount' => $changeData['amount'],
+                        'currency_id' => $currency->id,
+                        'amount_in_base' => $amountInBase,
+                        'is_change' => true,
+                    ]);
+                }
             }
 
             // ── 6. Cargar relaciones para la respuesta ────────
@@ -208,6 +233,7 @@ class SaleController extends Controller
                         'currency_symbol' => $p->paymentMethod->currency->symbol ?? '',
                         'amount' => $p->amount,
                         'amount_in_base' => $p->amount_in_base,
+                        'is_change' => $p->is_change,
                     ]),
                     'total' => $sale->total,
                     'created_at' => $sale->created_at,
@@ -253,6 +279,7 @@ class SaleController extends Controller
                     'currency_symbol' => $p->paymentMethod->currency->symbol ?? '',
                     'amount' => $p->amount,
                     'amount_in_base' => $p->amount_in_base,
+                    'is_change' => $p->is_change,
                 ]),
                 'total' => $sale->total,
                 'created_at' => $sale->created_at,
