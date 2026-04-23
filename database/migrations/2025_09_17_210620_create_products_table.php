@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-       Schema::create('products', function (Blueprint $table) {
+        Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->foreignId('companies_id')->constrained()->onDelete('restrict');
             $table->foreignId('department_id')->constrained()->onDelete('restrict');
@@ -17,15 +17,7 @@ return new class extends Migration {
             $table->string('reference')->nullable();
             $table->text('description')->nullable();
             $table->decimal('cost', 12, 2)->default(0);
-            $table->enum('base_unit', [
-                'unit', 'box', 'pack', 'pair', 'dozen',
-                'kg', 'gr', 'lb', 'oz',
-                'lt', 'ml', 'gal',
-                'm', 'cm', 'mm', 'inch',
-                'sqm', 'sqft',
-                'hour', 'day',
-                'service'
-            ])->default('unit');
+            $table->string('base_unit', 50)->default('unit');
             $table->timestamps();
         });
     }

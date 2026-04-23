@@ -55,15 +55,15 @@ class ProductController extends Controller
         }
 
         $rules = [
-            'name'          => 'required|string',
+            'name' => 'required|string',
             'department_id' => 'required|integer|exists:departments,id',
-            'description'   => 'nullable|string',
-            'cost'          => 'required|numeric|min:0',
-            'is_decimal'    => 'required|boolean',
-            'base_unit'     => 'required|in:unit,box,pack,pair,dozen,kg,gr,lb,oz,lt,ml,gal,m,cm,mm,inch,sqm,sqft,hour,day,service',
-            'currency_id'   => 'required|exists:currencies,id',
-            'reference'     => 'nullable|string',
-            'stock'         => 'nullable|numeric|min:0',
+            'description' => 'nullable|string',
+            'cost' => 'required|numeric|min:0',
+            'is_decimal' => 'required|boolean',
+            'base_unit' => 'required|in:unit,box,pack,pair,dozen,kg,gr,lb,oz,lt,ml,gal,m,cm,mm,inch,sqm,sqft,hour,day,service',
+            'currency_id' => 'required|exists:currencies,id',
+            'reference' => 'nullable|string',
+            'stock' => 'nullable|numeric|min:0',
         ];
 
         if (!$company->auto_code_products) {
@@ -79,8 +79,8 @@ class ProductController extends Controller
 
             // 2. Crear la Unidad Base
             $unit = ProductUnit::create([
-                'product_id'        => $product->id,
-                'unit_type'         => $validated['base_unit'],
+                'product_id' => $product->id,
+                'unit_type' => $validated['base_unit'],
                 'conversion_factor' => 1,
             ]);
 
@@ -93,20 +93,20 @@ class ProductController extends Controller
 
             foreach ($priceTypes as $pt) {
                 $price = ProductPrice::create([
-                    'product_unit_id'   => $unit->id,
-                    'price_type_id'     => $pt['id'],
-                    'price_usd'         => $validated['cost'] * (1 + $pt['profit'] / 100),
+                    'product_unit_id' => $unit->id,
+                    'price_type_id' => $pt['id'],
+                    'price_usd' => $validated['cost'] * (1 + $pt['profit'] / 100),
                     'profit_percentage' => $pt['profit'],
                 ]);
 
                 PriceHistory::create([
-                    'product_price_id'      => $price->id,
-                    'user_id'               => $user->id,
-                    'old_price'             => 0,
-                    'new_price'             => $price->price_usd,
+                    'product_price_id' => $price->id,
+                    'user_id' => $user->id,
+                    'old_price' => 0,
+                    'new_price' => $price->price_usd,
                     'old_profit_percentage' => 0,
                     'new_profit_percentage' => $price->profit_percentage,
-                    'change_reason'         => $pt['reason'],
+                    'change_reason' => $pt['reason'],
                 ]);
             }
 
@@ -144,7 +144,7 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'cost' => 'sometimes|numeric',
             'is_decimal' => 'sometimes|boolean',
-            'base_unit' => 'sometimes|in:unit,box,pack,pair,dozen,kg,gr,lb,oz,lt,ml,gal,m,cm,mm,inch,sqm,sqft,hour,day,service',
+            'base_unit' => 'sometimes|string|max:50',
             'currency_id' => 'sometimes|exists:currencies,id',
             'reference' => 'nullable|string',
         ];

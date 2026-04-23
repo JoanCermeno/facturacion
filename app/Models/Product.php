@@ -59,18 +59,18 @@ class Product extends Model
 	];
 	//Comprobamos si la empresa tieene seteado el campo de auto generar codigos del producto. 
 	protected static function booted()
-    {
-        static::creating(function ($product) {
-           $company = \App\Models\Companies::find($product->companies_id);
+	{
+		static::creating(function ($product) {
+			$company = \App\Models\Companies::find($product->companies_id);
 
 
-            if ($company && $company->auto_code_products && empty($product->code)) {
-                $prefix = $company->product_code_prefix ?? 'PRD-';
-                $lastId = self::where('companies_id', $company->id)->max('id') + 1;
-                $product->code = $prefix . str_pad($lastId, 4, '0', STR_PAD_LEFT);
-            }
-        });
-    }
+			if ($company && $company->auto_code_products && empty($product->code)) {
+				$prefix = $company->product_code_prefix ?? 'PRD-';
+				$lastId = self::where('companies_id', $company->id)->max('id') + 1;
+				$product->code = $prefix . str_pad($lastId, 4, '0', STR_PAD_LEFT);
+			}
+		});
+	}
 
 	public function company()
 	{
@@ -84,7 +84,7 @@ class Product extends Model
 
 	public function prices()
 	{
-   		return $this->hasMany(ProductPrice::class);
+		return $this->hasMany(ProductPrice::class);
 	}
 	public function units()
 	{
@@ -105,6 +105,12 @@ class Product extends Model
 	public function hasInventoryOperations()
 	{
 		return $this->inventoryDetails()->exists();
+	}
+	protected function unitType(): Attribute
+	{
+		return Attribute::make(
+			set: fn($value) => ucfirst(strtolower(trim($value))),
+		);
 	}
 
 }
