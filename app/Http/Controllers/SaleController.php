@@ -7,6 +7,7 @@ use App\Models\SaleItem;
 use App\Models\SalePayment;
 use App\Models\Invoice;
 use App\Models\Product;
+use App\Models\ProductPrice;
 use App\Models\CashRegister;
 use App\Models\Currency;
 use Illuminate\Http\Request;
@@ -145,8 +146,17 @@ class SaleController extends Controller
 
             // ── 3. Crear items y descontar stock ──────────────
             foreach ($data['items'] as $itemData) {
-                $product = Product::findOrFail($itemData['product_id']);
-                $unitPrice = $product->cost;
+                $product = Product::with('units.prices')->findOrFail($itemData['product_id']);
+
+                // Obtener el precio de venta desde product_prices.
+                // Se toma la unidad base (primera) y el tipo de precio al contado (price_type_id = 1).
+                // Si no existe, se usa el cost como fallback.
+                $baseUnit = $product->units->first();
+                $productPrice = $baseUnit
+                    ? $baseUnit->prices->where('price_type_id', 1)->first()
+                    : null;
+
+                $unitPrice = $productPrice ? $productPrice->price_usd : $product->cost;
                 $subtotal = $unitPrice * $itemData['quantity'];
                 $total += $subtotal;
 

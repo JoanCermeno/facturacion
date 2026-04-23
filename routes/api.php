@@ -10,6 +10,7 @@ use App\Http\Controllers\CashierController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductUnitController;
 use App\Http\Controllers\ProductImportController;
 use App\Http\Controllers\InventoryOperationController;
 use App\Http\Controllers\PaymentMethodController;
@@ -39,7 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Rutas para gestionar el perfil del usuario autenticado
     // Se recomienda usar un único recurso para el perfil del usuario,
-    // y si es necesario actualizar partes específicas, usar métodos PUT/PATCH al recurso principal.
+    // y si es necesario actualizar partes específicas, usar métodos 1PUT/PATCH al recurso principal.
     Route::get('/profile', [ProfileController::class, 'show']); // Mostrar datos del perfil
     Route::put('/profile', [ProfileController::class, 'update']); // Actualizar datos generales del perfil
 
@@ -78,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //productos routes
     Route::apiResource('products', ProductController::class);
+    Route::apiResource('product-units', ProductUnitController::class);
     Route::post('/products/import', [ProductImportController::class, 'import']);
     Route::apiResource('inventory-operations', InventoryOperationController::class);
     Route::apiResource('payment-methods', PaymentMethodController::class);

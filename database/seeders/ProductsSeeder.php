@@ -38,9 +38,8 @@ class ProductsSeeder extends Seeder
         ]);
 
         DB::table('product_units')->insert([
-            ['product_id' => $sardinaId, 'unit_type' => 'unit', 'conversion_factor' => 1,  'created_at' => now(), 'updated_at' => now()],
-            ['product_id' => $sardinaId, 'unit_type' => 'pack', 'conversion_factor' => 6,  'created_at' => now(), 'updated_at' => now()],
-            ['product_id' => $sardinaId, 'unit_type' => 'box',  'conversion_factor' => 12, 'created_at' => now(), 'updated_at' => now()],
+            ['product_id' => $sardinaId, 'unit_type' => 'unit', 'conversion_factor' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['product_id' => $sardinaId, 'unit_type' => 'box', 'conversion_factor' => 12, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         // =============================
@@ -60,7 +59,7 @@ class ProductsSeeder extends Seeder
         ]);
 
         DB::table('product_units')->insert([
-            ['product_id' => $aceiteId, 'unit_type' => 'lt',  'conversion_factor' => 1,     'created_at' => now(), 'updated_at' => now()],
+            ['product_id' => $aceiteId, 'unit_type' => 'lt', 'conversion_factor' => 1, 'created_at' => now(), 'updated_at' => now()],
             ['product_id' => $aceiteId, 'unit_type' => 'gal', 'conversion_factor' => 3.785, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
@@ -81,9 +80,9 @@ class ProductsSeeder extends Seeder
         ]);
 
         DB::table('product_units')->insert([
-            ['product_id' => $arrozId, 'unit_type' => 'kg',  'conversion_factor' => 1,   'created_at' => now(), 'updated_at' => now()],
-            ['product_id' => $arrozId, 'unit_type' => 'lb',  'conversion_factor' => 2.2, 'created_at' => now(), 'updated_at' => now()],
-            ['product_id' => $arrozId, 'unit_type' => 'box', 'conversion_factor' => 20,  'created_at' => now(), 'updated_at' => now()],
+            ['product_id' => $arrozId, 'unit_type' => 'kg', 'conversion_factor' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['product_id' => $arrozId, 'unit_type' => 'lb', 'conversion_factor' => 2.2, 'created_at' => now(), 'updated_at' => now()],
+            ['product_id' => $arrozId, 'unit_type' => 'box', 'conversion_factor' => 20, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         // =============================

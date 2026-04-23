@@ -21,14 +21,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-     
+
         // companias seeder
         $this->call(CompaniesSeeder::class);
 
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => Hash::make('12345678'),
+            'password' => Hash::make('password'),
             'role' => 'admin',
             'companies_id' => 1,
         ]);

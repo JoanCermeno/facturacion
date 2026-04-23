@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductUnit;
+use App\Models\ProductPrice;
+use App\Models\PriceHistory;
+use App\Models\Companies;
 use Illuminate\Http\Request;
-use \App\Models\Companies;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -22,13 +26,13 @@ class ProductController extends Controller
         $perPage = $request->input('per_page', 15);
 
         $query = Product::where('companies_id', $user->companies_id)
-            ->with(['department','currency']);
+            ->with(['department:id,description,type', 'currency:id,symbol,exchange_rate,conversion_type', 'units.prices.priceType']);
 
         // 🔍 Aplicar filtro si viene texto de búsqueda
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                ->orWhere('code', 'like', "%{$search}%");
+                    ->orWhere('code', 'like', "%{$search}%");
             });
         }
 
@@ -44,20 +48,22 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
+        $company = $user->company;
 
-        //Validamos si la empresa tiene seteado el campo de auto generar codigos del producto.
-        $company = Companies::find($user->companies_id);
+        if (!$company) {
+            return response()->json(['message' => 'No tienes empresa asociada.'], 403);
+        }
+
         $rules = [
-            'name' => 'required|string',
+            'name'          => 'required|string',
             'department_id' => 'required|integer|exists:departments,id',
-            'description' => 'nullable|string',
-            'cost' => 'required|numeric',
-            'is_decimal' => 'required|boolean',
-            'base_unit' => 'required|in:unit,box,pack,pair,dozen,kg,gr,lb,oz,lt,ml,gal,m,cm,mm,inch,sqm,sqft,hour,day,service',
-            'currency_id' => 'required|exists:currencies,id',
-            'reference' => 'nullable|string',
-            'price_usd' => 'nullable|numeric|min:0',
-            'profit_percentage' => 'nullable|numeric',
+            'description'   => 'nullable|string',
+            'cost'          => 'required|numeric|min:0',
+            'is_decimal'    => 'required|boolean',
+            'base_unit'     => 'required|in:unit,box,pack,pair,dozen,kg,gr,lb,oz,lt,ml,gal,m,cm,mm,inch,sqm,sqft,hour,day,service',
+            'currency_id'   => 'required|exists:currencies,id',
+            'reference'     => 'nullable|string',
+            'stock'         => 'nullable|numeric|min:0',
         ];
 
         if (!$company->auto_code_products) {
@@ -67,49 +73,46 @@ class ProductController extends Controller
         $validated = $request->validate($rules);
         $validated['companies_id'] = $user->companies_id;
 
-        return \Illuminate\Support\Facades\DB::transaction(function() use ($validated, $user) {
+        return DB::transaction(function () use ($validated, $user) {
+            // 1. Crear el Producto
             $product = Product::create($validated);
 
-            // 1. Crear la Unidad Base
-            $unit = \App\Models\ProductUnit::create([
-                'product_id' => $product->id,
-                'unit_type' => $validated['base_unit'],
+            // 2. Crear la Unidad Base
+            $unit = ProductUnit::create([
+                'product_id'        => $product->id,
+                'unit_type'         => $validated['base_unit'],
                 'conversion_factor' => 1,
             ]);
 
-            // 2. Crear los Precios (Contado, Mayor, Crédito)
-            // Si el usuario envió un precio/margen específico, lo usamos para el Precio al Contado (ID 1)
-            $defaultProfit = $validated['profit_percentage'] ?? 30; // 30% por defecto solicitado por el usuario
-            $retailPrice = $validated['price_usd'] ?? ($validated['cost'] * (1 + $defaultProfit / 100));
-
+            // 3. Crear los Precios base (Contado, Mayor, Crédito) con ganancias por defecto
             $priceTypes = [
-                ['id' => 1, 'profit' => $defaultProfit, 'price' => $retailPrice],
-                ['id' => 2, 'profit' => 15, 'price' => $validated['cost'] * 1.15],
-                ['id' => 3, 'profit' => 50, 'price' => $validated['cost'] * 1.50],
+                ['id' => 1, 'profit' => 30, 'reason' => 'Precio inicial (Contado)'],
+                ['id' => 2, 'profit' => 15, 'reason' => 'Precio inicial (Mayorista)'],
+                ['id' => 3, 'profit' => 50, 'reason' => 'Precio inicial (Crédito)'],
             ];
 
             foreach ($priceTypes as $pt) {
-                $price = \App\Models\ProductPrice::create([
-                    'product_unit_id' => $unit->id,
-                    'price_type_id' => $pt['id'],
-                    'price_usd' => $pt['price'],
+                $price = ProductPrice::create([
+                    'product_unit_id'   => $unit->id,
+                    'price_type_id'     => $pt['id'],
+                    'price_usd'         => $validated['cost'] * (1 + $pt['profit'] / 100),
                     'profit_percentage' => $pt['profit'],
                 ]);
 
-                \App\Models\PriceHistory::create([
-                    'product_price_id' => $price->id,
-                    'user_id' => $user->id,
-                    'old_price' => 0,
-                    'new_price' => $price->price_usd,
+                PriceHistory::create([
+                    'product_price_id'      => $price->id,
+                    'user_id'               => $user->id,
+                    'old_price'             => 0,
+                    'new_price'             => $price->price_usd,
                     'old_profit_percentage' => 0,
                     'new_profit_percentage' => $price->profit_percentage,
-                    'change_reason' => 'Precio inicial al crear producto',
+                    'change_reason'         => $pt['reason'],
                 ]);
             }
 
             return response()->json([
                 'message' => 'Producto registrado con unidades y precios base ✅',
-                'product' => $product->load('units.prices')
+                'product' => $product->load('units.prices.priceType')
             ], 201);
         });
     }
@@ -119,13 +122,13 @@ class ProductController extends Controller
     {
         $product->load([
             'company',
-            'department',
+            'department:id,description,type',
             'units.prices.priceType'
         ]);
 
-        return response()->json([ 
+        return response()->json([
             'message' => 'Productos guardados correctamente ✅',
-            'product'  => $product    
+            'product' => $product
         ]);
     }
 
@@ -133,7 +136,7 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $user = $request->user();
-        $company = \App\Models\Companies::find($user->companies_id);
+        $company = $user->company;
 
         $rules = [
             'name' => 'sometimes|string',

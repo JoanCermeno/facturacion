@@ -19,13 +19,17 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @package App\Models
  */
+
 class PriceType extends Model
 {
 	protected $table = 'price_types';
-	public $timestamps = false;
+
+	// 💡 BORRAMOS: public $timestamps = false; (Porque sí tienes created_at y updated_at)
 
 	protected $fillable = [
-		'name'
+		'companies_id', // Clave para el multitenant
+		'name',
+		'slug'
 	];
 
 	public function product_prices()
