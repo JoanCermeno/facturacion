@@ -12,6 +12,7 @@ class InventoryOperationDetail extends Model
     protected $fillable = [
         'operation_id',
         'product_id',
+        'product_unit_id',
         'quantity',
     ];
 
@@ -23,5 +24,9 @@ class InventoryOperationDetail extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+    public function unit()
+    {
+        return $this->belongsTo(ProductUnit::class, 'product_unit_id');
     }
 }

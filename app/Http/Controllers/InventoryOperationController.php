@@ -17,7 +17,7 @@ class InventoryOperationController extends Controller
             return response()->json(['message' => 'No tienes una compañía asociada.'], 403);
         }
 
-        $query = InventoryOperation::with(['details.product', 'user'])
+        $query = InventoryOperation::with(['details.product', 'details.unit', 'user'])
             ->where('company_id', $user->companies_id)
             ->orderBy('operation_date', 'desc');
 
@@ -31,7 +31,7 @@ class InventoryOperationController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('responsible', 'like', "%$search%")
-                ->orWhere('note', 'like', "%$search%");
+                    ->orWhere('note', 'like', "%$search%");
             });
         }
 
@@ -59,6 +59,8 @@ class InventoryOperationController extends Controller
             'operation_date' => 'required|date_format:Y-m-d',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|integer|exists:products,id',
+            // 🚀 NUEVA REGLA: Aceptamos la unidad seleccionada (opcional)
+            'items.*.product_unit_id' => 'nullable|integer|exists:product_units,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
         ]);
 
@@ -90,34 +92,53 @@ class InventoryOperationController extends Controller
                 ]);
 
                 foreach ($validated['items'] as $item) {
-                    $product = Product::findOrFail($item['product_id']);
-                    $quantity = $item['quantity'];
+                    $product = Product::where('id', $item['product_id'])
+                        ->where('companies_id', $companyId) // Seguridad Multitenant
+                        ->firstOrFail();
 
-                    // ⚠️ Validar stock disponible antes del descargo
-                    if ($validated['operation_type'] === 'descargo' && $product->stock < $quantity) {
-                        throw new \Exception("El producto '{$product->name}' no tiene stock suficiente. Stock actual: {$product->stock}");
+                    $quantity = $item['quantity']; // Ej: 5 (bultos)
+                    $conversionFactor = 1;         // Por defecto es 1 (Unidad Base)
+                    $productUnitId = null;
+
+                    // 🚀 LA MAGIA: Si enviaron una presentación, calculamos su valor real
+                    if (isset($item['product_unit_id']) && $item['product_unit_id']) {
+                        // Buscamos la unidad asegurando que pertenece a este producto
+                        $unit = \App\Models\ProductUnit::where('id', $item['product_unit_id'])
+                            ->where('product_id', $product->id)
+                            ->firstOrFail();
+
+                        $conversionFactor = $unit->conversion_factor; // Ej: 20
+                        $productUnitId = $unit->id;
+                    }
+
+                    // Multiplicamos: 5 bultos * 20 = 100 unidades base reales a mover
+                    $baseQuantity = $quantity * $conversionFactor;
+
+                    // ⚠️ Validar stock disponible antes del descargo (usando la cantidad base)
+                    if ($validated['operation_type'] === 'descargo' && $product->stock < $baseQuantity) {
+                        throw new \Exception("El producto '{$product->name}' no tiene stock suficiente. Intentas sacar {$baseQuantity}, pero solo hay {$product->stock}");
                     }
 
                     // Actualizar stock según tipo de operación
                     switch ($validated['operation_type']) {
                         case 'cargo':
-                            $product->stock += $quantity;
+                            $product->stock += $baseQuantity; // Suma 100
                             break;
-
                         case 'descargo':
-                            $product->stock -= $quantity;
+                            $product->stock -= $baseQuantity; // Resta 100
                             break;
-
                         case 'ajuste':
-                            $product->stock = $quantity;
+                            $product->stock = $baseQuantity;  // Iguala a 100
                             break;
                     }
 
                     $product->save();
 
+                    // Guardar el detalle de la operación exactamente como ocurrió
                     $operation->details()->create([
                         'product_id' => $product->id,
-                        'quantity' => $quantity,
+                        'product_unit_id' => $productUnitId, // Registramos si fue en Caja, Bulto, etc.
+                        'quantity' => $quantity,             // Registramos que fueron "5"
                     ]);
                 }
 
@@ -129,11 +150,11 @@ class InventoryOperationController extends Controller
                 'operation' => $operation->load('details'),
             ], 201);
 
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Error al crear la operación',
+                'message' => 'Error al procesar el inventario',
                 'error' => $e->getMessage(),
-            ], 400); // Cambiado a 400 (error de validación de negocio)
+            ], 400);
         }
     }
 
@@ -142,22 +163,4 @@ class InventoryOperationController extends Controller
         return response()->json($inventoryOperation->load('details'));
     }
 
-    // public function update(Request $request, InventoryOperation $inventoryOperation)
-    // {
-    //     $inventoryOperation->update($request->all());
-
-    //     return response()->json([
-    //         'message' => 'Operación actualizada correctamente ✅',
-    //         'operation' => $inventoryOperation,
-    //     ]);
-    // }
-
-    // public function destroy(InventoryOperation $inventoryOperation)
-    // {
-    //     $inventoryOperation->delete();
-
-    //     return response()->json([
-    //         'message' => 'Operación eliminada correctamente ✅',
-    //     ]);
-    // }
 }
