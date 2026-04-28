@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProfileController; 
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\CashierController;
@@ -19,11 +19,12 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CashRegisterController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\PricingController;
+use App\Http\Controllers\PosController;
 
 
 // Rutas de Autenticación
 Route::prefix('auth')->group(function () {
-    Route::post('/register',[AuthController::class, 'register']);
+    Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     // 'logout' debe ser un POST y requiere autenticación
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -48,9 +49,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // puedes mantener rutas anidadas si lo prefieres, o manejarlo dentro de 'update'.
     // Si mantienes rutas separadas, considera usar PATCH si solo modificas una parte.
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
-    
+
     // Rutas para la gestión de la compañía del usuario (admin, o duenio de la empresa)
-    Route::apiResource('companies', CompaniesController::class)->only(['show','update']);
+    Route::apiResource('companies', CompaniesController::class)->only(['show', 'update']);
     Route::get('/my-company', [CompaniesController::class, 'myCompany']);
     Route::put('/my-company', [CompaniesController::class, 'updateMyCompany']);
     Route::post('/companies/logo', [CompaniesController::class, 'uploadLogo']);
@@ -60,7 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/sellers', [SellerController::class, 'store']); // Crear vendedor
     Route::delete('/sellers/{seller}', [SellerController::class, 'destroy']); // Borrar vendedor
     Route::put('/sellers/{seller}', [SellerController::class, 'update']); // Editar vendedor
-    
+
     // Rutas para la gestión de los cajeros
     Route::get('/cashiers', [CashierController::class, 'index']);
     Route::post('/cashiers', [CashierController::class, 'store']);
@@ -90,6 +91,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // ──────────────────────────────────────────────────────
     // MÓDULO POS: Caja Registradora y Ventas
     // ──────────────────────────────────────────────────────
+
+    Route::get('/pos/search', [PosController::class, 'searchProducts']);
+    Route::get('/pos/price-types', [PosController::class, 'priceTypes']);
 
     // Cash Registers (Apertura y Cierre de Caja)
     Route::get('/cash-registers/current', [CashRegisterController::class, 'current']);

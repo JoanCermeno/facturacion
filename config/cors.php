@@ -19,9 +19,11 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [env('FRONTEND_URL', 'http://localhost:3000'),
-	'http://192.168.0.124:3000', 
-	],
+    'allowed_origins' => [
+        env('FRONTEND_URL', 'http://localhost:3000'),
+        'http://192.168.0.124:3000',
+        'https://pos-system-app-teal.vercel.app', // Tu frontend en Vercel
+    ],
 
     'allowed_origins_patterns' => [],
 

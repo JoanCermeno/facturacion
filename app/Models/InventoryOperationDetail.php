@@ -14,6 +14,7 @@ class InventoryOperationDetail extends Model
         'product_id',
         'product_unit_id',
         'quantity',
+
     ];
 
     public function operation()

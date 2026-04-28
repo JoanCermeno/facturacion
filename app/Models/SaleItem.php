@@ -14,6 +14,7 @@ class SaleItem extends Model
     protected $fillable = [
         'sale_id',
         'product_id',
+        'product_unit_id',
         'quantity',
         'unit_price',
         'subtotal',
@@ -33,5 +34,10 @@ class SaleItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(\App\Models\ProductUnit::class, 'product_unit_id');
     }
 }

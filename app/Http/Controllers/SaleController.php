@@ -23,12 +23,12 @@ class SaleController extends Controller
         $user = $request->user();
 
         $query = Sale::with([
-                'customer:id,name',
-                'user:id,name',
-                'items',
-                'payments.paymentMethod.currency',
-                'invoice',
-            ])
+            'customer:id,name',
+            'user:id,name',
+            'items',
+            'payments.paymentMethod.currency',
+            'invoice',
+        ])
             ->where('company_id', $user->companies_id)
             ->orderBy('created_at', 'desc');
 
@@ -44,9 +44,9 @@ class SaleController extends Controller
                 $q->whereHas('invoice', function ($iq) use ($search) {
                     $iq->where('invoice_number', 'like', "%{$search}%");
                 })
-                ->orWhereHas('customer', function ($cq) use ($search) {
-                    $cq->where('name', 'like', "%{$search}%");
-                });
+                    ->orWhereHas('customer', function ($cq) use ($search) {
+                        $cq->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -101,6 +101,8 @@ class SaleController extends Controller
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
+            'items.*.product_unit_id' => 'nullable|exists:product_units,id',
+            'items.*.price_type_id' => 'nullable|integer',
             'payments' => 'required|array|min:1',
             'payments.*.payment_method_id' => 'required|exists:payment_methods,id',
             'payments.*.amount' => 'required|numeric|min:0.01',
@@ -144,16 +146,20 @@ class SaleController extends Controller
                 'status' => 'completed',
             ]);
 
+
             // ── 3. Crear items y descontar stock ──────────────
             foreach ($data['items'] as $itemData) {
                 $product = Product::with('units.prices')->findOrFail($itemData['product_id']);
 
-                // Obtener el precio de venta desde product_prices.
-                // Se toma la unidad base (primera) y el tipo de precio al contado (price_type_id = 1).
-                // Si no existe, se usa el cost como fallback.
-                $baseUnit = $product->units->first();
-                $productPrice = $baseUnit
-                    ? $baseUnit->prices->where('price_type_id', 1)->first()
+                // Determinar la unidad (enviada por frontend o primera disponible)
+                $selectedUnit = isset($itemData['product_unit_id'])
+                    ? $product->units->firstWhere('id', $itemData['product_unit_id'])
+                    : $product->units->first();
+
+                // Determinar el tipo de precio (enviado por frontend o default contado)
+                $priceTypeId = $itemData['price_type_id'] ?? 1;
+                $productPrice = $selectedUnit
+                    ? $selectedUnit->prices->where('price_type_id', $priceTypeId)->first()
                     : null;
 
                 $unitPrice = $productPrice ? $productPrice->price_usd : $product->cost;
@@ -163,13 +169,20 @@ class SaleController extends Controller
                 SaleItem::create([
                     'sale_id' => $sale->id,
                     'product_id' => $product->id,
+                    'product_unit_id' => $selectedUnit?->id,
                     'quantity' => $itemData['quantity'],
                     'unit_price' => $unitPrice,
                     'subtotal' => $subtotal,
                 ]);
 
+                // 🚀 ARREGLO CRÍTICO: Cálculo matemático real del stock a descontar
+                // Si la unidad seleccionada tiene un factor de conversión (ej: Bulto = 24)
+                // multiplicamos la cantidad que compró por ese factor.
+                $factorConversion = $selectedUnit ? $selectedUnit->conversion_factor : 1;
+                $cantidadRealADescontar = $itemData['quantity'] * $factorConversion;
+
                 // Descontar stock
-                $product->decrement('stock', $itemData['quantity']);
+                $product->decrement('stock', $cantidadRealADescontar);
             }
 
             // ── 4. Actualizar total de la venta ───────────────
@@ -218,7 +231,8 @@ class SaleController extends Controller
 
             // ── 6. Cargar relaciones para la respuesta ────────
             $sale->load([
-                'items.product:id,name,code',
+                'items.product:id,name,code,is_decimal',
+                'items.unit:id,unit_type',
                 'payments.paymentMethod.currency',
                 'customer:id,name',
                 'invoice',
@@ -237,6 +251,8 @@ class SaleController extends Controller
                         'quantity' => $item->quantity,
                         'unit_price' => $item->unit_price,
                         'subtotal' => $item->subtotal,
+                        'is_decimal' => (bool) ($item->product->is_decimal ?? false),
+                        'unit_type' => $item->unit?->unit_type ?? null,
                     ]),
                     'payments' => $sale->payments->map(fn($p) => [
                         'method_name' => $p->paymentMethod->description,
@@ -261,12 +277,13 @@ class SaleController extends Controller
         $user = $request->user();
 
         $sale = Sale::with([
-                'items.product:id,name,code',
-                'payments.paymentMethod.currency',
-                'customer:id,name',
-                'user:id,name',
-                'invoice',
-            ])
+            'items.product:id,name,code,is_decimal',
+            'items.unit:id,unit_type',
+            'payments.paymentMethod.currency',
+            'customer:id,name',
+            'user:id,name',
+            'invoice',
+        ])
             ->where('company_id', $user->companies_id)
             ->findOrFail($id);
 
@@ -283,6 +300,8 @@ class SaleController extends Controller
                     'quantity' => $item->quantity,
                     'unit_price' => $item->unit_price,
                     'subtotal' => $item->subtotal,
+                    'is_decimal' => (bool) ($item->product->is_decimal ?? false),
+                    'unit_type' => $item->unit?->unit_type ?? null,
                 ]),
                 'payments' => $sale->payments->map(fn($p) => [
                     'method_name' => $p->paymentMethod->description,

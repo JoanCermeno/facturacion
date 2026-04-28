@@ -41,7 +41,8 @@ class Product extends Model
 		'cost' => 'float',
 		'companies_id' => 'int',
 		'department_id' => 'int',
-		'stock' => 'float'
+		'stock' => 'float',
+		'is_decimal' => 'boolean',
 	];
 
 	protected $fillable = [
