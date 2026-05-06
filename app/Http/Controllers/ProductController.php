@@ -36,6 +36,16 @@ class ProductController extends Controller
             });
         }
 
+        // 📦 Filtro de stock máximo — usado por el Dashboard para productos críticos.
+        //    Ejemplo: GET /api/products?stock_lte=5&per_page=50
+        //    El índice compuesto (companies_id, stock) en la migración de dashboard
+        //    hace que esta query sea muy eficiente incluso con catálogos grandes.
+        $stockLte = $request->input('stock_lte');
+        if ($stockLte !== null && is_numeric($stockLte)) {
+            $query->where('stock', '<=', (float) $stockLte)
+                  ->orderBy('stock', 'asc'); // Los más críticos primero
+        }
+
         $products = $query->paginate($perPage);
 
         return response()->json([

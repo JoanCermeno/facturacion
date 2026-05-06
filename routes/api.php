@@ -20,6 +20,7 @@ use App\Http\Controllers\CashRegisterController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\PricingController;
 use App\Http\Controllers\PosController;
+use App\Http\Controllers\DashboardController;
 
 
 // Rutas de Autenticación
@@ -103,6 +104,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Sales (Ventas / Facturación)
     Route::apiResource('sales', SaleController::class)->only(['index', 'store', 'show']);
+
+    // ──────────────────────────────────────────────────────
+    // MÓDULO DASHBOARD: Estadísticas y KPIs
+    // ──────────────────────────────────────────────────────
+    // GET /api/dashboard/stats
+    //   Devuelve: totalSalesToday (USD), ordersToday, weeklySales[], topProducts[]
+    //   El frontend convierte USD a moneda local usando el exchange_rate de /currencies.
+    //
+    // 🔁 MIGRAR MOCK: Cuando actives esta ruta, actualiza useDashboardStats.js:
+    //   const fetchDashboardStats = () => fetchAPI('/dashboard/stats');
+    Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
     // Módulo de Precios
     Route::get('/pricing', [PricingController::class, 'index']);

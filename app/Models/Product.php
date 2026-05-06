@@ -7,6 +7,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use \App\Models\Companies;
@@ -106,6 +107,12 @@ class Product extends Model
 	public function hasInventoryOperations()
 	{
 		return $this->inventoryDetails()->exists();
+	}
+
+	// Relación con items de ventas (usada por el Dashboard para top-productos)
+	public function saleItems()
+	{
+		return $this->hasMany(SaleItem::class);
 	}
 	protected function unitType(): Attribute
 	{
