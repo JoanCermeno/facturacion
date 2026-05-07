@@ -22,28 +22,6 @@ use App\Http\Controllers\PricingController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\DashboardController;
 
-// estoi jamas jamas se debe hacer esto es un hackero  a la capa gratuita de render:
-Route::get('/super-secret-migrate', function () {
-    try {
-        // En producción SIEMPRE se requiere el --force
-        Artisan::call('migrate:fresh', [
-            '--seed' => true,
-            '--force' => true
-        ]);
-
-        return response()->json([
-            'status' => '¡Éxito!',
-            'message' => 'Base de datos limpiada, migrada y poblada correctamente.',
-            'log' => Artisan::output()
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'Error',
-            'message' => $e->getMessage()
-        ], 500);
-    }
-});
-
 
 // Rutas de Autenticación
 Route::prefix('auth')->group(function () {
