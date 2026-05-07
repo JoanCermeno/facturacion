@@ -121,4 +121,28 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/pricing/update', [PricingController::class, 'update']);
     Route::get('/pricing/history', [PricingController::class, 'history']);
 
+
+
+
+    Route::get('/super-secret-migrate', function () {
+        try {
+            // En producción SIEMPRE se requiere el --force
+            Artisan::call('migrate:fresh', [
+                '--seed' => true,
+                '--force' => true
+            ]);
+
+            return response()->json([
+                'status' => '¡Éxito!',
+                'message' => 'Base de datos limpiada, migrada y poblada correctamente.',
+                'log' => Artisan::output()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    });
+
 });
