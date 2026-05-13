@@ -31,15 +31,6 @@ class CurrencySeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            [
-                'companies_id' => $company->id,
-                'name' => 'Peso Colombiano',
-                'symbol' => 'COP',
-                'exchange_rate' => 4200,
-                'is_base' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
         ]);
     }
 }

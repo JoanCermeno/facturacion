@@ -16,15 +16,15 @@ class CompaniesSeeder extends Seeder
         //
         DB::table('companies')->insert(
             [
-                "name" => "Joan C.A",
+                "name" => "Empresa De ejemlo",
                 "address" => "calle cualquiera",
                 "phone" => "04145057588",
-                "email" => "emporesa@email.com",
+                "email" => "myempresa@gmail.com",
                 "invoice_sequence" => 1,
                 'auto_code_products' => true,
                 'auto_code_departments' => true,
-                'product_code_prefix' => 'PROD-',
-                'department_code_prefix' => 'DEP-',
+                'product_code_prefix' => 'P',
+                'department_code_prefix' => 'D',
                 'logo_path' => null,
             ]
         );
